@@ -1,4 +1,5 @@
 import React from 'react';
+import { AuthContext } from '../context/context';
 import { 
     StyleSheet,
     Text,
@@ -9,21 +10,22 @@ import {
     TouchableOpacity,
  } from 'react-native';
 
-export default function Login() {
+export default function Login({ navigation }) {
+    const {signIn} = React.useContext(AuthContext);
     return (
         <View style={styles.container}>
             <Text style={styles.h1}>Just us</Text>
             <Image style={styles.image} source={require("../assets/logoped.png")} />
 
-            <TouchableOpacity style={styles.loginBtn}>
-                <Text style={styles.loginText}>LOGIN</Text>
+            <TouchableOpacity style={styles.loginBtn} onPress={() => signIn()}>
+                <Text style={styles.loginText} >LOGIN</Text>
             </TouchableOpacity>
 
             <TouchableOpacity>
                 <Text style={styles.forgot_button}>Forgot Password?</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.loginBtn}>
+            <TouchableOpacity style={styles.loginBtn} onPress={() => navigation.navigate("CreateUser")}>
                 <Text style={styles.loginText}>CREATE NEW USER</Text>
             </TouchableOpacity>
         </View>

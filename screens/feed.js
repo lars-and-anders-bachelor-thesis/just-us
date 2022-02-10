@@ -1,4 +1,5 @@
 import React from 'react';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { 
     StyleSheet,
     Text,
@@ -9,10 +10,13 @@ import {
     TouchableOpacity,
  } from 'react-native';
 
-export default function Feed() {
+export default function Feed({ navigation }) {
     return (
         <View style={styles.container}>
-        <Text>Heyo</Text>
+        <TouchableOpacity onPress={ () => navigation.navigate("Search")}>
+            <Icon name="search" size={30} color="black" />
+        </TouchableOpacity>
+        <Text>Search</Text>
         </View>
     )
 }

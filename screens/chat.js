@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { AuthContext } from '../context/context';
 import { 
     StyleSheet,
     Text,
@@ -10,14 +10,10 @@ import {
     TouchableOpacity,
  } from 'react-native';
 
-export default function Inbox({ navigation }) {
+export default function Chat() {
     return (
         <View style={styles.container}>
-            <Text>Her var det massevis av kok!</Text>
-
-            <TouchableOpacity style={styles.button} onPress={ () => navigation.navigate("Chat")}>
-                <Text style={styles.btntxt}>Chat with cheeto</Text>
-            </TouchableOpacity>
+            <Text style={styles.header}>chat chat chat</Text>
         </View>
     )
 }
@@ -28,8 +24,8 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         alignItems: "center",
         justifyContent: "center",
-    },
-    button: {
+      },
+      button: {
         alignSelf: 'stretch',
         alignItems: 'center',
         padding:20,
