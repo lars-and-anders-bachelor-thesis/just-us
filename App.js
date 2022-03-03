@@ -8,38 +8,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from "@react-navigation/stack";
 import { AuthContext } from "./context/context";
 
-
-// const Tab = createBottomTabNavigator();
-
-// function MyTabs() {
-//   return (
-//     <Tab.Navigator screenOptions={({ route }) => ({
-//       tabBarIcon: ({ focused}) => {
-//         let iconName;
-
-//         if (route.name === 'Home') {
-//           iconName = "home"
-//           return <Entypo name={iconName} size={24} color="black" />; // Her hadde React Navigation en finere kode. Sjekk ut den når du er blitt litt smartere i react native
-//         } else if (route.name === 'Profile') {
-//           return <MaterialCommunityIcons name="account" size={24} color="black" />
-//         } else if (route.name === 'Inbox') {
-//           return <Entypo name="inbox" size={24} color="black" />
-//         } else if (route.name === 'Privacy') {
-//           // Denne er midlertidig fordi login ikke skal være inne i hovedinnholdet
-//           return <Entypo name="bug" size={24} color="black" />
-//         }
-//       },
-//       tabBarActiveTintColor: 'tomato',
-//       tabBarInactiveTintColor: 'gray',
-//     })}>
-//       <Tab.Screen name="Home" component={FeedNest} options={{headerShown: false}}/>
-//       <Tab.Screen name="Privacy" component={ControlNest} options={{headerShown: false}}/>
-//       <Tab.Screen name="Inbox" component={InboxNest} options={{headerShown: false}}/>
-//       <Tab.Screen name="Profile" component={Profile} />
-//     </Tab.Navigator>
-//   );
-// }
-
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -81,7 +49,7 @@ export default function App() {
           <MyTabs />
         ) : (
           <Stack.Navigator>
-            <Stack.Screen name="Login" component={Login}/> 
+            <Stack.Screen name="Login" component={Login} options={{headerShown: false}}/> 
             <Stack.Screen name="CreateUser" component={CreateUser}/> 
           </Stack.Navigator>
         )}

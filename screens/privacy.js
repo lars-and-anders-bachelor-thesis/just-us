@@ -1,6 +1,5 @@
 import React from 'react';
 import { Entypo } from '@expo/vector-icons';
-
 import { 
     StyleSheet,
     Text,
@@ -9,6 +8,7 @@ import {
     TextInput,
     Button,
     TouchableOpacity,
+    Dimensions,
  } from 'react-native';
 
 export default function Privacy({ navigation }) {
