@@ -10,21 +10,24 @@ import {
     TouchableOpacity,
  } from 'react-native';
 
-export default function CreatePost() {
+export default function CreateUser() {
     const {signIn} = React.useContext(AuthContext);
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Create post</Text>
+            <Text style={styles.header}>Register User, bitch</Text>
 
-            <TextInput style={styles.textinput} placeholder="Title of the post" 
+            <TextInput style={styles.textinput} placeholder="Your name bitch" 
              underlineColorAndroid={'transparent'} ></TextInput>
 
-            <TextInput style={styles.textinput} placeholder="Content of the post"
+            <TextInput style={styles.textinput} placeholder="Your email bitch"
              underlineColorAndroid={'transparent'} ></TextInput>
+
+            <TextInput style={styles.textinput} secureTextEntry={true} placeholder="Your email bitch"
+             underlineColorAndroid={'transparent'}></TextInput>
            
-            <TouchableOpacity style={styles.buttonContainer}>
-                <Text style={styles.btntxt}>Post</Text>
+            <TouchableOpacity style={styles.button} onPress={ () => signIn()}>
+                <Text style={styles.btntxt}>Sign up here bitch</Text>
             </TouchableOpacity>
         </View>
     )
@@ -42,7 +45,7 @@ const styles = StyleSheet.create({
           color: '#000000',
           paddingBottom: 10,
           marginBottom: 40,
-          borderBottomColor: '#00BFFF',
+          borderBottomColor: '#199187',
           borderBottomWidth: 1,
       },
       textinput: {
@@ -53,16 +56,12 @@ const styles = StyleSheet.create({
           borderBottomColor: '#f8f8f8',
           borderBottomWidth: 1,
       },
-      buttonContainer: {
-        marginTop:10,
-        height:45,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginBottom:20,
-        width:250,
-        borderRadius:30,
-        backgroundColor: "#00BFFF",
+      button: {
+          alignSelf: 'stretch',
+          alignItems: 'center',
+          padding:20,
+          backgroundColor: '#59cbbd',
+          marginTop: 30,
       },
       btntxt: {
           color: '#fff',

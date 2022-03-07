@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import Profile from '../screens/profile';
-import FeedNest from '../customNavigation/feedNest';
-import InboxNest from '../customNavigation/inboxNest';
-import ControlNest from '../customNavigation/controlNest';
+import FeedNest from './feedNest';
+import InboxNest from './inboxNest';
+import ControlNest from './controlNest';
 import 'react-native-gesture-handler'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Entypo } from '@expo/vector-icons';

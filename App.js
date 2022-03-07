@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import Login from './screens/login';
-import CreateUser from './screens/createUser';
-import Splash from './screens/splash';
-import MyTabs from './customNavigation/myTabs';
+import Login from './frontend/screens/login';
+import CreateUser from './frontend/screens/createUser';
+import Splash from './frontend/screens/splash';
+import MyTabs from './frontend/customNavigation/myTabs';
 import 'react-native-gesture-handler'
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from "@react-navigation/stack";
-import { AuthContext } from "./context/context";
+import { AuthContext } from "./frontend/context/context";
 
 const Stack = createStackNavigator();
 
