@@ -13,12 +13,12 @@ type SmartContract struct {
 }
 
 type Asset struct {
-	Depth		int	`json:"depth"`
+//	Depth		int	`json:"depth"`
 	Owner		string 	`json:"owner"`
 	PostDate	string	`json:"postDate"`
 	Poster		string	`json:"poster"`
 	PostId		string	`json:"postId"`
-	Status		int	`json:"status"`
+//	Status		int	`json:"status"`
 }
 
 
@@ -37,12 +37,12 @@ postDate string, depth int, status int) error {
 		return fmt.Errorf("the asset %s already exists", id)
 	}
 	asset := Asset{
-		Depth:		depth,
+//		Depth:		depth,
 		Owner:          owner,
 		PostDate:	postDate,
 		Poster:		poster,
 		PostId:             id,
-		Status:		status,
+//		Status:		status,
 	}
 	assetJSON, err := json.Marshal(asset)
 	if err != nil {

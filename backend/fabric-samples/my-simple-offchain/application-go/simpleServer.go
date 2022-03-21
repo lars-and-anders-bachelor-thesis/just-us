@@ -16,35 +16,15 @@ import (
 	//"reflect"
 )
 
-func main() {
-	log.Println("============ Application starts ============")
-	db, err := NewOffchainDB("root", "meme", "tcp", "127.0.0.1:3306", "offchain")
-	if err != nil {
-		log.Printf("Something went wrong while connectig to the database.\n%v", err)
-		return 
-	}
-	defer db.Conn.Close()
-
-	network, err := configNet()
-	contract := network.GetContract("basic") 
-	//fmt.Println("network type : ",  reflect.TypeOf(contract))
-
-	//log.Println("--> Submit Transaction: InitLedger")
-	//result, err := contract.SubmitTransaction("InitLedger")
-	//if err != nil {
-	//	log.Fatalf("Failed to Submit transaction: %v", err)
-	//}
-	//log.Println(string(result))
-
-	//log.Println("--> Evaluate Transaction: GetAllAssets")
-	//result, err = contract.EvaluateTransaction("GetAllAssets")
-	//if err != nil {
-	//	log.Fatalf("Failed to evaluate transaction: %v", err)
-	//}
-	//log.Println(string(result))
-	reader := bufio.NewReader(os.Stdin)
-
-	// start the main idea: take the hash of data, store the hash on chain and data along with its hash in database.
+type Asset struct {
+	Data		string 	`json:"data"`
+        Depth           int     `json:"depth"`
+        Owner           string  `json:"owner"`
+        PostDate        string  `json:"postDate"`
+        Poster          string  `json:"poster"`
+        PostId          string  `json:"postId"`
+        //Status          int     `json:"status"`
+}
 
 	func handleRequests(){
 		http.HandleFunc("/getAllPosts", getAllPosts)
@@ -70,53 +50,89 @@ func main() {
 	}
 
 
-	for i := 0; i < 5; i++ {
-		log.Println("Please enter:  owner name, data to store")
-		userInput, err := reader.ReadString('\n')
-		if err != nil {
-			return 
-		}
-		// remove the delimeter from the string
-		userInput = strings.TrimSuffix(userInput, "\n")
-		// store the data along with its hash in the database
-		owner, data := intData(userInput)
-		ID := hashTxn(data)
-		err = db.InsertData(ID, data)
-		if err!= nil {
-			log.Printf("%v\n", err)
-			return
-		}
-
-		log.Println("--> Submit Transaction to on chain!")
-		result, err = contract.SubmitTransaction("CreateAsset", ID, owner)
-		if err != nil {
-			log.Fatalf("Failed to Submit transaction: %v", err)
-		}
-		log.Println("Asset is created: ", string(result))
-
-		log.Println("--> Evaluate Transaction on chain!")
-		result, err = contract.EvaluateTransaction("ReadAsset", ID)
-		if err != nil {
-			log.Fatalf("Failed to evaluate transaction: %v", err)
-		}
-		log.Printf("Transaction %s, is verfied!\n", string(result))
-	}
-
-	err = db.ReadAllData()
-	if err!= nil {
-		log.Printf("%v", err)
-		return
-	}
-
-	log.Println("Verifying data stored in Database and linked to chain;\nPlease provid Transaction ID:")
-	txid, err := reader.ReadString('\n')
+func main() {
+	log.Println("============ Application starts ============")
+	db, err := NewOffchainDB("root", "meme", "tcp", "127.0.0.1:3306", "offchain")
 	if err != nil {
+		log.Printf("Something went wrong while connectig to the database.\n%v", err)
 		return 
 	}
-	txid = strings.TrimSuffix(txid, "\n")
-	verifyTxn(txid, contract, db)
+	defer db.Conn.Close()
 
-	log.Println("============ Done ============")
+	network, err := configNet()
+	contract := network.GetContract("basic") 
+	handler := http.HandlerFunc(handleRequests)
+	http.Handle("/getAllPosts", handler)
+	http.ListenAndServe(":8080", nil)
+	//fmt.Println("network type : ",  reflect.TypeOf(contract))
+
+	//log.Println("--> Submit Transaction: InitLedger")
+	//result, err := contract.SubmitTransaction("InitLedger")
+	//if err != nil {
+	//	log.Fatalf("Failed to Submit transaction: %v", err)
+	//}
+	//log.Println(string(result))
+
+	//log.Println("--> Evaluate Transaction: GetAllAssets")
+	//result, err = contract.EvaluateTransaction("GetAllAssets")
+	//if err != nil {
+	//	log.Fatalf("Failed to evaluate transaction: %v", err)
+	//}
+	//log.Println(string(result))
+	//reader := bufio.NewReader(os.Stdin)
+
+	// start the main idea: take the hash of data, store the hash on chain and data along with its hash in database.
+
+	
+
+
+//	for i := 0; i < 5; i++ {
+//		log.Println("Please enter:  owner name, data to store")
+//		userInput, err := reader.ReadString('\n')
+//		if err != nil {
+//			return 
+//		}
+		// remove the delimeter from the string
+//		userInput = strings.TrimSuffix(userInput, "\n")
+		// store the data along with its hash in the database
+//		owner, data := intData(userInput)
+//		ID := hashTxn(data)
+//		err = db.InsertData(ID, data)
+//		if err!= nil {
+//			log.Printf("%v\n", err)
+//			return
+//		}
+//
+//		log.Println("--> Submit Transaction to on chain!")
+//		result, err = contract.SubmitTransaction("CreateAsset", ID, owner)
+//		if err != nil {
+//			log.Fatalf("Failed to Submit transaction: %v", err)
+//		}
+//		log.Println("Asset is created: ", string(result))
+
+//		log.Println("--> Evaluate Transaction on chain!")
+//		result, err = contract.EvaluateTransaction("ReadAsset", ID)
+//		if err != nil {
+//			log.Fatalf("Failed to evaluate transaction: %v", err)
+//		}
+//		log.Printf("Transaction %s, is verfied!\n", string(result))
+//	}
+
+//	err = db.ReadAllData()
+//	if err!= nil {
+//		log.Printf("%v", err)
+//		return
+//	}
+
+//	log.Println("Verifying data stored in Database and linked to chain;\nPlease provid Transaction ID:")
+//	txid, err := reader.ReadString('\n')
+//	if err != nil {
+//		return 
+//	}
+//	txid = strings.TrimSuffix(txid, "\n")
+//	verifyTxn(txid, contract, db)
+
+//	log.Println("============ Done ============")
 }
 
 // configNet initalizes and configures the network and identity.
