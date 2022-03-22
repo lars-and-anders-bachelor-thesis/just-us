@@ -3,7 +3,7 @@ package chaincode
 import (
         "encoding/json"
         "fmt"
-        "time"
+//        "time"
         "github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
@@ -23,11 +23,30 @@ type Asset struct {
 
 
 //add init function? populate with example posts?
+// init function neccessary for adding chaincode to peers. TODO: why neccessary, remove?
+func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
+        assets := []Asset{
+		{PostId: "hash of the data", Owner: "Hanif", PostDate: "this will be a date soon, use time package?", Poster:"lars"},
+        }
 
+        for _, asset := range assets {
+                assetJSON, err := json.Marshal(asset)
+                if err != nil {
+                        return err
+                }
+
+                err = ctx.GetStub().PutState(asset.PostId, assetJSON)
+                if err != nil {
+                        return fmt.Errorf("failed to put to world state. %v", err)
+                }
+        }
+
+        return nil
+}
 
 // CreateAsset issues a new asset to the world state with given details.
 func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, id string, owner string, poster string, 
-postDate string, depth int, status int) error {
+postDate string) error {
 	//create key here or in application?
 	exists, err := s.AssetExists(ctx, id)
 	if err != nil {
@@ -73,33 +92,33 @@ func (s *SmartContract) ReadAsset(ctx contractapi.TransactionContextInterface, i
 }
 
 
-func (s *SmartContract) UpdateAsset(ctx contractapi.TransactionContextInterface,depth int, id string, poster string, status int) error {
-	exists, err := s.AssetExists(ctx, id)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return fmt.Errorf("the asset %s does not exist", id)
-	}
+//func (s *SmartContract) UpdateAsset(ctx contractapi.TransactionContextInterface, id string, poster string) error {
+//	exists, err := s.AssetExists(ctx, id)
+//	if err != nil {
+//		return err
+//	}
+//	if !exists {
+//		return fmt.Errorf("the asset %s does not exist", id)
+//	}
 
 	// overwriting original asset with new asset
-	asset := Asset{
-		Depth: 		depth,
-                Owner:          owner,
-                PostDate:       postDate,
-                Poster:         poster,
-                PostId:             id,
-                Status:         status,
-        }
-
-	assetJSON, err := json.Marshal(asset)
-	if err != nil {
-		return err
-	}
-
-	return ctx.GetStub().PutState(id, assetJSON)
-}
-
+//	asset := Asset{
+//                Depth: 		depth,
+//                Owner:          owner,
+//                PostDate:       postDate,
+//                Poster:         poster,
+//                PostId:             id,
+//                Status:         status,
+//        }
+//
+//	assetJSON, err := json.Marshal(asset)
+//	if err != nil {
+//		return err
+//	}
+//
+//	return ctx.GetStub().PutState(id, assetJSON)
+//}
+//
 // DeleteAsset deletes an given asset from the world state.
 func (s *SmartContract) DeleteAsset(ctx contractapi.TransactionContextInterface, id string) error {
 	exists, err := s.AssetExists(ctx, id)

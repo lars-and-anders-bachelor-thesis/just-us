@@ -12,6 +12,7 @@ import (
 
 
 
+
 // OffchainDB is an instance of database
 type OffchainDB struct {
 	Config mysql.Config
@@ -92,12 +93,13 @@ func (oc *OffchainDB) ReadData(ID string) error {
 }
 
 // ReadAllData reads all data stored in the Offchain database.
-func (oc *OffchainDB) ReadAllData() (error, Linkdata) {
+func (oc *OffchainDB) ReadAllData() (error, *[]Linkdata) {
+	emptyLink := &[]Linkdata{}
 	fmt.Printf("Reading all data from the linkdata table in OffchainDB database..\n")
 	results, err := oc.Conn.Query("SELECT ID, Offdata FROM linkdata")
 	if err != nil {
 		fmt.Printf("Something went wrong while trying to select from database.\n%v",err)
-		return err
+		return err,emptyLink 
 	}
 	defer results.Close() 
 	var values []Linkdata
@@ -107,7 +109,7 @@ func (oc *OffchainDB) ReadAllData() (error, Linkdata) {
 		err = results.Scan(&links.ID, &links.data)
 		if err != nil {
 			fmt.Printf("Something went wrong while casting data to the composite object.\n%v",err)
-			return err, nil 
+			return err, emptyLink
 		}
 		//testing
 		values = append(values,links)
@@ -115,7 +117,7 @@ func (oc *OffchainDB) ReadAllData() (error, Linkdata) {
 		log.Printf("ID: %s\nDATA: %s\n", links.ID, links.data)
 	}
 	fmt.Println("Done!")
-	return nil, values
+	return nil, &values
 }
 
 // DeleteData deletes data from the database given its hash.

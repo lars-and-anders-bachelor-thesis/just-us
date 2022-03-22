@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
-	"bufio"
+//	"bufio"
 	"os"
 	"strings"
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
@@ -16,9 +16,11 @@ import (
 	//"reflect"
 )
 
+
+
 type Asset struct {
 	Data		string 	`json:"data"`
-        Depth           int     `json:"depth"`
+//        Depth           int     `json:"depth"`
         Owner           string  `json:"owner"`
         PostDate        string  `json:"postDate"`
         Poster          string  `json:"poster"`
@@ -28,7 +30,7 @@ type Asset struct {
 
 	func handleRequests(){
 		http.HandleFunc("/getAllPosts", getAllPosts)
-		http.HandleFunc("/createPost", createPost)
+//		http.HandleFunc("/createPost", createPost)
 		log.Fatal(http.ListenAndServe(":10000", nil))
 	}
 
@@ -37,7 +39,9 @@ type Asset struct {
 		log.Println("--> Endpoint Hit: getAllPosts")
 		log.Println("--> Evaluate Transaction: GetAllAssets")
 		//finn alle posts du kan se for en bruker
-		result, err = contract.EvaluateTransaction("GetAllAssets")
+		network, err := configNet()
+		contract := network.GetContract("basic")
+		result, err := contract.EvaluateTransaction("GetAllAssets")
 		if err != nil {
 			log.Fatalf("Failed to evaluate transaction: %v", err)
 		}
@@ -45,7 +49,7 @@ type Asset struct {
 		w.WriteHeader(http.StatusCreated)
 		w.Header().Set("Content-Type", "application/json")
 		//create db function for fetching full posts from database
-	 	result, err = db.ReadAllData()
+//	 	result, err = db.ReadAllData()
 		w.Write(result)
 	}
 
@@ -59,11 +63,9 @@ func main() {
 	}
 	defer db.Conn.Close()
 
-	network, err := configNet()
-	contract := network.GetContract("basic") 
-	handler := http.HandlerFunc(handleRequests)
-	http.Handle("/getAllPosts", handler)
-	http.ListenAndServe(":8080", nil)
+//	network, err := configNet()
+//	contract := network.GetContract("basic") 
+	handleRequests()
 	//fmt.Println("network type : ",  reflect.TypeOf(contract))
 
 	//log.Println("--> Submit Transaction: InitLedger")
