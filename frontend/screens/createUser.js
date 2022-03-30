@@ -15,15 +15,15 @@ export default function CreateUser() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Register User, bitch</Text>
+            <Text style={styles.header}>Register User</Text>
 
-            <TextInput style={styles.textinput} placeholder="Your name bitch" 
+            <TextInput style={styles.textinput} placeholder="Your name" 
              underlineColorAndroid={'transparent'} ></TextInput>
 
-            <TextInput style={styles.textinput} placeholder="Your email bitch"
+            <TextInput style={styles.textinput} placeholder="Your email"
              underlineColorAndroid={'transparent'} ></TextInput>
 
-            <TextInput style={styles.textinput} secureTextEntry={true} placeholder="Your email bitch"
+            <TextInput style={styles.textinput} secureTextEntry={true} placeholder="Your email"
              underlineColorAndroid={'transparent'}></TextInput>
            
             <TouchableOpacity style={styles.button} onPress={ () => signIn()}>
