@@ -23,7 +23,7 @@ export default function CreateUser() {
             <TextInput style={styles.textinput} placeholder="Your email"
              underlineColorAndroid={'transparent'} ></TextInput>
 
-            <TextInput style={styles.textinput} secureTextEntry={true} placeholder="Your Password"
+            <TextInput style={styles.textinput} secureTextEntry={true} placeholder="Your Password here"
              underlineColorAndroid={'transparent'}></TextInput>
            
             <TouchableOpacity style={styles.button} onPress={ () => signIn()}>
