@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"path/filepath"
 
+	"github.com/gorilla/mux"
+
 	//	"bufio"
 	"crypto/sha256"
 	"encoding/hex"
@@ -37,9 +39,10 @@ type Asset struct {
 }
 
 func handleRequests() {
-	http.HandleFunc("/getAllPosts", getAllPosts)
-	//		http.HandleFunc("/createPost", createPost)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	r := mux.NewRouter().StrictSlash(true)
+	r.HandleFunc("/Posts", getAllPosts)
+	r.HandleFunc("/Post", createPost).Methods("POST")
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 func getAllPosts(w http.ResponseWriter, r *http.Request) {
@@ -61,10 +64,25 @@ func getAllPosts(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// 	func createPost(w http.ResponseWriter, r *http.Request){
-// 		log.Println("--> Endpoint Hit: createPost")
-//
-// 	}
+func createPost(w http.ResponseWriter, r *http.Request) {
+	log.Println("--> Endpoint Hit: createPost")
+	body, _ := ioutil.ReadAll(r.Body)
+	var post Asset
+	json.Unmarshal(body, &post)
+	post.PostId = hashTxn(post.Data)
+	post.PostDate = "today"
+	post.Poster = post.Owner
+	log.Printf("received data: %v", post.Data)
+	_, err := contract.EvaluateTransaction("CreateAsset", post.PostId, post.Owner, post.Poster, post.PostDate)
+	if err != nil {
+		log.Fatalf("Failed to evaluate transaction: %v", err)
+	}
+	err = db.InsertData(post.PostId, post.Data)
+	if err != nil {
+		log.Printf("%v\n", err)
+		return
+	}
+}
 
 func main() {
 	log.Println("============ Application starts ============")
