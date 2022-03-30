@@ -1,70 +1,98 @@
 package main
 
 import (
-	"net/http"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"path/filepath"
-//	"bufio"
-	"os"
-	"strings"
-	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
-	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
+
+	//	"bufio"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
+	"os"
+	"strings"
+
+	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
+	"github.com/hyperledger/fabric-sdk-go/pkg/gateway"
 	//"reflect"
 )
 
+var err error
+var db *OffchainDB
+var network *gateway.Network
+var contract *gateway.Contract
 
+//var contract *gateway.Contract
 
 type Asset struct {
-	Data		string 	`json:"data"`
-//        Depth           int     `json:"depth"`
-        Owner           string  `json:"owner"`
-        PostDate        string  `json:"postDate"`
-        Poster          string  `json:"poster"`
-        PostId          string  `json:"postId"`
-        //Status          int     `json:"status"`
+	Data string `json:"data"`
+	//        Depth           int     `json:"depth"`
+	Owner    string `json:"owner"`
+	PostDate string `json:"postDate"`
+	Poster   string `json:"poster"`
+	PostId   string `json:"postId"`
+	//Status          int     `json:"status"`
 }
 
-	func handleRequests(){
-		http.HandleFunc("/getAllPosts", getAllPosts)
-//		http.HandleFunc("/createPost", createPost)
-		log.Fatal(http.ListenAndServe(":10000", nil))
-	}
+func handleRequests() {
+	http.HandleFunc("/getAllPosts", getAllPosts)
+	//		http.HandleFunc("/createPost", createPost)
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
 
+func getAllPosts(w http.ResponseWriter, r *http.Request) {
+	log.Println("--> Endpoint Hit: getAllPosts")
+	log.Println("--> Evaluate Transaction: GetAllAssets")
+	//finn alle posts du kan se for en bruker
+	//		network, err := configNet()
+	/* 		contract := network.GetContract("basic")
+	res, err := contract.EvaluateTransaction("GetAllAssets")
+	if err != nil {
+		log.Fatalf("Failed to evaluate transaction: %v", err)
+	} */
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	//create db function for fetching full posts from database
+	_, result := db.ReadAllData()
+	finalResult, _ := json.Marshal(result)
+	w.Write(finalResult)
 
-	func getAllPosts(w http.ResponseWriter, r *http.Request){
-		log.Println("--> Endpoint Hit: getAllPosts")
-		log.Println("--> Evaluate Transaction: GetAllAssets")
-		//finn alle posts du kan se for en bruker
-		network, err := configNet()
-		contract := network.GetContract("basic")
-		result, err := contract.EvaluateTransaction("GetAllAssets")
-		if err != nil {
-			log.Fatalf("Failed to evaluate transaction: %v", err)
-		}
-		log.Println(string(result))
-		w.WriteHeader(http.StatusCreated)
-		w.Header().Set("Content-Type", "application/json")
-		//create db function for fetching full posts from database
-//	 	result, err = db.ReadAllData()
-		w.Write(result)
-	}
+}
 
+// 	func createPost(w http.ResponseWriter, r *http.Request){
+// 		log.Println("--> Endpoint Hit: createPost")
+//
+// 	}
 
 func main() {
 	log.Println("============ Application starts ============")
-	db, err := NewOffchainDB("root", "meme", "tcp", "127.0.0.1:3306", "offchain")
+	network, err = configNet()
+	db, err = NewOffchainDB("ubuntu", "meme", "tcp", "127.0.0.1:3306", "offchain")
 	if err != nil {
 		log.Printf("Something went wrong while connectig to the database.\n%v", err)
-		return 
+		return
 	}
 	defer db.Conn.Close()
+	contract = network.GetContract("basic")
+	// store the data along with its hash in the database
+	result, err := contract.EvaluateTransaction("GetAllAssets")
+	if err != nil {
+		log.Fatalf("Failed to evaluate transaction: %v", err)
+	}
+	_, res := db.ReadAllData()
+	log.Print(len(*res))
+	if len(*res) == 0 {
+		initData := &[10]Asset{}
+		err = json.Unmarshal(result, initData)
+		log.Printf("creating list?")
+		if err != nil {
+			log.Fatalf("oinkers, anders failed! %v", err)
+		}
+		err = initDb(initData)
+	}
 
-//	network, err := configNet()
-//	contract := network.GetContract("basic") 
 	handleRequests()
 	//fmt.Println("network type : ",  reflect.TypeOf(contract))
 
@@ -85,56 +113,67 @@ func main() {
 
 	// start the main idea: take the hash of data, store the hash on chain and data along with its hash in database.
 
-	
+	//	for i := 0; i < 5; i++ {
+	//		log.Println("Please enter:  owner name, data to store")
+	//		userInput, err := reader.ReadString('\n')
+	//		if err != nil {
+	//			return
+	//		}
+	// remove the delimeter from the string
+	//		userInput = strings.TrimSuffix(userInput, "\n")
+	// store the data along with its hash in the database
+	//		owner, data := intData(userInput)
+	//		ID := hashTxn(data)
+	//		err = db.InsertData(ID, data)
+	//		if err!= nil {
+	//			log.Printf("%v\n", err)
+	//			return
+	//		}
+	//
+	//		log.Println("--> Submit Transaction to on chain!")
+	//		result, err = contract.SubmitTransaction("CreateAsset", ID, owner)
+	//		if err != nil {
+	//			log.Fatalf("Failed to Submit transaction: %v", err)
+	//		}
+	//		log.Println("Asset is created: ", string(result))
 
+	//		log.Println("--> Evaluate Transaction on chain!")
+	//		result, err = contract.EvaluateTransaction("ReadAsset", ID)
+	//		if err != nil {
+	//			log.Fatalf("Failed to evaluate transaction: %v", err)
+	//		}
+	//		log.Printf("Transaction %s, is verfied!\n", string(result))
+	//	}
 
-//	for i := 0; i < 5; i++ {
-//		log.Println("Please enter:  owner name, data to store")
-//		userInput, err := reader.ReadString('\n')
-//		if err != nil {
-//			return 
-//		}
-		// remove the delimeter from the string
-//		userInput = strings.TrimSuffix(userInput, "\n")
-		// store the data along with its hash in the database
-//		owner, data := intData(userInput)
-//		ID := hashTxn(data)
-//		err = db.InsertData(ID, data)
-//		if err!= nil {
-//			log.Printf("%v\n", err)
-//			return
-//		}
-//
-//		log.Println("--> Submit Transaction to on chain!")
-//		result, err = contract.SubmitTransaction("CreateAsset", ID, owner)
-//		if err != nil {
-//			log.Fatalf("Failed to Submit transaction: %v", err)
-//		}
-//		log.Println("Asset is created: ", string(result))
+	//	err = db.ReadAllData()
+	//	if err!= nil {
+	//		log.Printf("%v", err)
+	//		return
+	//	}
 
-//		log.Println("--> Evaluate Transaction on chain!")
-//		result, err = contract.EvaluateTransaction("ReadAsset", ID)
-//		if err != nil {
-//			log.Fatalf("Failed to evaluate transaction: %v", err)
-//		}
-//		log.Printf("Transaction %s, is verfied!\n", string(result))
-//	}
+	//	log.Println("Verifying data stored in Database and linked to chain;\nPlease provid Transaction ID:")
+	//	txid, err := reader.ReadString('\n')
+	//	if err != nil {
+	//		return
+	//	}
+	//	txid = strings.TrimSuffix(txid, "\n")
+	//	verifyTxn(txid, contract, db)
 
-//	err = db.ReadAllData()
-//	if err!= nil {
-//		log.Printf("%v", err)
-//		return
-//	}
+	//	log.Println("============ Done ============")
+}
 
-//	log.Println("Verifying data stored in Database and linked to chain;\nPlease provid Transaction ID:")
-//	txid, err := reader.ReadString('\n')
-//	if err != nil {
-//		return 
-//	}
-//	txid = strings.TrimSuffix(txid, "\n")
-//	verifyTxn(txid, contract, db)
-
-//	log.Println("============ Done ============")
+func initDb(initData *[10]Asset) error {
+	for _, val := range initData {
+		ID := hashTxn(val.PostId)
+		log.Printf(ID)
+		err = db.InsertData(ID, "Id cumque voluptas quasi accusantium veniam qui. hilsen "+val.Owner)
+		log.Printf("fail here?")
+		if err != nil {
+			log.Printf("%v\n", err)
+			return err
+		}
+	}
+	return nil
 }
 
 // configNet initalizes and configures the network and identity.
@@ -224,9 +263,9 @@ func populateWallet(wallet *gateway.Wallet) error {
 	return wallet.Put("appUser", identity)
 }
 
-// intData splittes the user input data 
+// intData splittes the user input data
 func intData(userInput string) (string, string) {
-	splitData := strings.Split(userInput,",")
+	splitData := strings.Split(userInput, ",")
 	owner := splitData[0]
 	data := splitData[1]
 	return owner, data
@@ -248,9 +287,9 @@ func verifyTxn(txid string, contract *gateway.Contract, db *OffchainDB) {
 	}
 	log.Printf("Transaction %s, is verfied!\n", string(result))
 	err = db.ReadData(txid)
-	if err!= nil {
+	if err != nil {
 		log.Printf("%v", err)
 		return
 	}
 	log.Printf("Transaction connection to database is verified!\n")
-} 
+}
