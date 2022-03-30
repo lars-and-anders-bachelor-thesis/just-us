@@ -46,7 +46,7 @@ import {
       userImg: require('../assets/profile_pictures/user-3.jpg'),
       messageTime: '1 hours ago',
       messageText:
-        'Hey there, I was just wondering if you had your friend Alexanders number? He is just so handsome <3',
+        'Hey there, this is my test for a post of my social app in React Native.',
     },
     {
       id: '4',
