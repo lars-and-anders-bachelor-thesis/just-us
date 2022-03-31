@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { 
     StyleSheet,
@@ -8,9 +8,104 @@ import {
     TextInput,
     Button,
     TouchableOpacity,
+    FlatList,
  } from 'react-native';
 
-export default function Feed({ navigation }) {
+ const DATA = [
+     {
+         user_name: 'Lars Andreas Jåten',
+         user_image: '../assets/profile_pictures/user-1.jpg',
+         feed_image: 'https://www.datocms-assets.com/55942/1633528751-topptur.jpg?q=70&auto=format&w=450&fit=crop&crop=faces,focalpoint&iptc=allow&fp-x=0.5&fp-y=0.5',
+         like_count: '13037',
+         comment_count: '70'
+     },
+     {
+         user_name: 'Andreas Ringnes',
+         user_image: '../assets/profile_pictures/user-2.jpg',
+         feed_image: 'https://www.datocms-assets.com/55942/1633528751-topptur.jpg?q=70&auto=format&w=450&fit=crop&crop=faces,focalpoint&iptc=allow&fp-x=0.5&fp-y=0.5',
+         like_count: '13537',
+         comment_count: '44'
+     },
+     {
+         user_name: 'Willem Barents',
+         user_image:  '../assets/profile_pictures/user-3.jpg',
+         feed_image: 'https://www.datocms-assets.com/55942/1633528751-topptur.jpg?q=70&auto=format&w=450&fit=crop&crop=faces,focalpoint&iptc=allow&fp-x=0.5&fp-y=0.5',
+         like_count: '13337',
+         comment_count: '31'
+     },
+     {
+         user_name: 'Leif Eriksson',
+         user_image: '../assets/profile_pictures/user-4.jpg',
+         feed_image: 'https://www.datocms-assets.com/55942/1633528751-topptur.jpg?q=70&auto=format&w=450&fit=crop&crop=faces,focalpoint&iptc=allow&fp-x=0.5&fp-y=0.5',
+         like_count: '13137',
+         comment_count: '52'
+     },
+ ]
+
+
+
+ function Item({ item }){
+    return (
+        <View style={styles.card}>
+            <View style={styles.card_Header}>
+                <View style={styles.header_Left}>
+                    <Image 
+                    style={styles.userImage}
+                    source={{
+                        uri: DATA[3].feed_image,
+                    }}/>
+                    <Text style={styles.userName}>{item.title}</Text>
+                </View>
+                <View style={styles.header_Right}>
+                    <Icon name="ellipsis-h" style={styles.kake}/>
+                </View>
+            </View>
+            {/* <Image 
+                    style={styles.feedImage}
+                    source={{
+                        uri: DATA[3].feed_image,
+            }}/> */}
+            <Text>{item.description}</Text>
+            <View style={styles.card_Footer}>
+                <View style={styles.footer_Left}>
+                    <View style={styles.footer_Left}>
+                        <Icon name="heart" color="red" size={20}/>
+                        <Text style={{ marginLeft: 5, fontSize: 16}}>{item.id}</Text>
+                    </View>
+                <View style={{flexDirection: "row", marginLeft: 15}}></View>
+                    <Icon name="comment" color="gray" size={20}/>
+                    <Text style={{ marginLeft: 5, fontSize: 16}}>{DATA[3].like_count}</Text>
+                </View>
+                <Icon name="bookmark" color="gray" size={20}/>
+            </View>
+
+        </View>
+    )
+ };
+
+
+ export default function Feed({ navigation }) {
+
+    const FakeItem = ({ item }) => {
+        return (
+            <Text>Title of the coffee is {item.title}</Text>
+        )
+    };
+   
+    const [data, setData] = useState([]);
+        const [loading, setLoading] = useState(true);
+        
+        const fetchData = async () => {
+            const resp = await fetch("https://api.sampleapis.com/coffee/hot");
+            const data = await resp.json();
+            setData(data);
+            setLoading(false);
+        };   
+
+     useEffect(() => {
+        fetchData();
+      }, []);
+
     return (
         <View style={styles.container}>
         <TouchableOpacity onPress={ () => navigation.navigate("Search for people")}  style={styles.search_icon}>
@@ -19,23 +114,19 @@ export default function Feed({ navigation }) {
         <TouchableOpacity onPress={ () => navigation.navigate("Create a post")}  style={styles.plus_icon}>
             <Icon name="plus" size={40} color="black"/>
         </TouchableOpacity>
-        <View style={styles.card}>
-            <View style={styles.card_Header}>
-                <View style={styles.header_Left}>
-                    <Image 
-                    style={styles.userImage}
-                    source={{
-                        uri: 'https://reactnative.dev/img/tiny_logo.png',
-                    }}/>
-                    <Text style={styles.userName}>Lars-Andreas Jåten</Text>
-                </View>
-                <View style={styles.header_Right}>
-                    <Icon name="ellipsis-h" style={styles.kake}/>
 
-                </View>
-            </View>
-        </View>
-        </View>
+        <FlatList
+            data={data} // DATA
+            // renderItem={({ item }) => <Item user_name={item.user_name}
+            // user_image={item.user_image}
+            // feed_image={item.feed_image}
+            // like_count={item.like_count}
+            // comment_count={item.comment_count}
+            // />}
+            renderItem={Item}
+            keyExtractor={(item) => item.id} //.ToString()
+        />
+        </View> 
     )
 }
 
@@ -79,5 +170,57 @@ const styles = StyleSheet.create({
     },
     kake: {
         fontSize: 20,
-    }
+    },
+    feedImage: {
+        height: 300,
+        borderRadius: 10,
+        marginVertical: 10,
+    },
+    card_Footer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 10,
+    },
+    footer_Left: {
+        flexDirection: 'row',
+    },
 })  
+   
+// import React, { useState, useEffect } from "react";
+// import { Box, FlatList, Center, View, NativeBaseProvider, Text } from "react-native";
+
+// export default function Feed({ navigation }) {
+//   const [data, setData] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   const fetchData = async () => {
+//     const resp = await fetch("https://api.sampleapis.com/coffee/hot");
+//     const data = await resp.json();
+//     setData(data);
+//     setLoading(false);
+//   };
+
+//   useEffect(() => {
+//     fetchData();
+//   }, []);
+
+//   const renderItem = ({ item }) => {
+//     return (
+//     //   <Box px={5} py={2} rounded="md" bg="primary.300" my={2}>
+//     //     {item.title}
+//     //   </Box>
+//         <Text>{item.title} is the title. {item.description} is the description</Text>
+//     );
+//   };
+
+//   return (
+//     <View>
+//           <FlatList
+//             data={data}
+//             renderItem={renderItem}
+//             keyExtractor={(item) => item.id}
+//           />
+//           {/* <Text>{data.map(oink => oink.id)} is the best ever!</Text> */}
+//     </View>
+//   );
+// }
