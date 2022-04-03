@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { AuthContext } from '../context/context';
 import { 
     StyleSheet,
@@ -12,17 +12,39 @@ import {
 
 export default function CreatePost() {
 
+    const [owner, setOwner] = useState('');
+    const [data, setData] = useState('');
+
+
+
+    function Submit()
+    {   
+        alert("The owner is "+owner["owner"]+" and the content is "+data["data"])
+
+        try{
+            fetch('http://152.94.171.1:8080/Post', {
+                method: 'POST',
+                body: JSON.stringify({data: data["data"], owner: owner["owner"]})
+            });
+        }catch{
+            console.log("ay dette funka visst ikke kompis")
+        }
+    };
+
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Create post</Text>
 
-            <TextInput style={styles.textinput} placeholder="Title of the post" 
-             underlineColorAndroid={'transparent'} ></TextInput>
+            <TextInput style={styles.textinput} placeholder="Owner of the post" 
+             underlineColorAndroid={'transparent'}
+             onChangeText={(text)=> setOwner({owner: text})}
+             ></TextInput>
 
             <TextInput style={styles.textinput} placeholder="Content of the post"
+             onChangeText={(text)=> setData({data: text})}
              underlineColorAndroid={'transparent'} ></TextInput>
            
-            <TouchableOpacity style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.buttonContainer} onPress={()=>{Submit()}}>
                 <Text style={styles.btntxt}>Post</Text>
             </TouchableOpacity>
         </View>

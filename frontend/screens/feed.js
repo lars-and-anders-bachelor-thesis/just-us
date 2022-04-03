@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import axios from 'react-native-axios';
 import { 
     StyleSheet,
     Text,
@@ -10,6 +11,7 @@ import {
     TouchableOpacity,
     FlatList,
  } from 'react-native';
+import { registerRootComponent } from 'expo';
 
  const DATA = [
      {
@@ -54,7 +56,7 @@ import {
                     source={{
                         uri: DATA[3].feed_image,
                     }}/>
-                    <Text style={styles.userName}>{item.title}</Text>
+                    <Text style={styles.userName}>{item.id}</Text>
                 </View>
                 <View style={styles.header_Right}>
                     <Icon name="ellipsis-h" style={styles.kake}/>
@@ -65,12 +67,12 @@ import {
                     source={{
                         uri: DATA[3].feed_image,
             }}/> */}
-            <Text>{item.description}</Text>
+            <Text>{item.Data}</Text>
             <View style={styles.card_Footer}>
                 <View style={styles.footer_Left}>
                     <View style={styles.footer_Left}>
                         <Icon name="heart" color="red" size={20}/>
-                        <Text style={{ marginLeft: 5, fontSize: 16}}>{item.id}</Text>
+                        <Text style={{ marginLeft: 5, fontSize: 16}}>{DATA[3].comment_count}</Text>
                     </View>
                 <View style={{flexDirection: "row", marginLeft: 15}}></View>
                     <Icon name="comment" color="gray" size={20}/>
@@ -93,14 +95,27 @@ import {
     };
    
     const [data, setData] = useState([]);
-        const [loading, setLoading] = useState(true);
-        
-        const fetchData = async () => {
-            const resp = await fetch("https://api.sampleapis.com/coffee/hot");
-            const data = await resp.json();
-            setData(data);
-            setLoading(false);
-        };   
+    const [loading, setLoading] = useState(true);
+    
+    const fetchData = async () => {
+        let resp;
+        const resp0nse = await axios.get('http://152.94.171.1:8080/Posts')
+        .then(function (response) {
+            // handle success
+            resp = response.data;
+        })
+        .catch(function (error) {
+            // handle error
+            console.log(error);
+        })
+        .then(function () {
+            // always executed
+        });
+        const data = resp;
+        console.log(data)
+        setData(data);
+        setLoading(false);
+    };   
 
      useEffect(() => {
         fetchData();
