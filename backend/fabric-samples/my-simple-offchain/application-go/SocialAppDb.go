@@ -18,8 +18,8 @@ type OffchainDB struct {
 
 // Linkdata is an instance of database query response
 type Linkdata struct {
-	ID   string
-	data string
+	ID   string `json:"id"`
+	Data string `json;"data`
 }
 
 // NewOffchainDB configures and start a database connection.
@@ -79,12 +79,12 @@ func (oc *OffchainDB) ReadData(ID string) error {
 	for results.Next() {
 		var links Linkdata
 		// for each row, scan the result into our tag composite object
-		err = results.Scan(&links.data)
+		err = results.Scan(&links.Data)
 		if err != nil {
 			fmt.Printf("Something went wrong while casting data to the composite object.\n%v", err)
 			return err
 		}
-		log.Printf("DATA: %s\n", links.data)
+		log.Printf("DATA: %s\n", links.Data)
 	}
 	return nil
 }
@@ -103,7 +103,7 @@ func (oc *OffchainDB) ReadAllData() (error, *[]Linkdata) {
 	for results.Next() {
 		var links Linkdata
 		// for each row, scan the result into our tag composite object
-		err = results.Scan(&links.ID, &links.data)
+		err = results.Scan(&links.ID, &links.Data)
 		if err != nil {
 			fmt.Printf("Something went wrong while casting data to the composite object.\n%v", err)
 			return err, emptyLink
