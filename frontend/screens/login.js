@@ -15,7 +15,7 @@ export default function Login({ navigation }) {
     return (
         <View style={styles.container}>
             <Text style={styles.h1}>Just us</Text>
-            <Image style={styles.image} source={require("../assets/logoped.png")} />
+            <Image style={styles.image} source={require("../assets/lock.png")} />
 
             <TouchableOpacity style={styles.loginBtn} onPress={() => signIn()}>
                 <Text style={styles.loginText} >LOGIN</Text>
@@ -69,12 +69,12 @@ const styles = StyleSheet.create({
   
     loginBtn: {
       width: "80%",
-      borderRadius: 25,
+      borderRadius: 10,
       height: 50,
       alignItems: "center",
       justifyContent: "center",
       marginTop: 40,
-      backgroundColor: "#FF1493",
+      backgroundColor: "#157EFB",
     },
     h1: {
       fontSize: 80,

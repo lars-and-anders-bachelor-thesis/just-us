@@ -23,6 +23,7 @@ export default function Privacy({ navigation }) {
 
 const styles = StyleSheet.create({
     container: {
+        padding: 50, // this is not best pratice
         flex: 1,
         backgroundColor: "#fff",
         alignItems: "center",
@@ -32,8 +33,9 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         alignItems: 'center',
         padding:20,
-        backgroundColor: '#59cbbd',
+        backgroundColor: '#00BFFF',
         marginTop: 30,
+        borderRadius: 10,
     },
     btntxt: {
         color: '#fff',

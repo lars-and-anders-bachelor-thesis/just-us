@@ -15,8 +15,6 @@ export default function CreatePost() {
     const [owner, setOwner] = useState('');
     const [data, setData] = useState('');
 
-
-
     function Submit()
     {   
         alert("The owner is "+owner["owner"]+" and the content is "+data["data"])
