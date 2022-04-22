@@ -15,29 +15,47 @@ type SmartContract struct {
 }
 
 type Asset struct {
-	//	Depth		int	`json:"depth"`
-	Owner    string `json:"owner"`
-	PostDate string `json:"postDate"`
-	Poster   string `json:"poster"`
-	PostId   string `json:"postId"`
+	ForwardingHistory []string `json: "forwardingHistory"`
+	Owner             string   `json:"owner"`
+	PostId            string   `json:"postId"`
+	SharingHistory    []string `json: "sharingHistory"`
+	//PostDate string `json:"postDate"`
+	//Poster   string `json:"poster"`
 	//	Status		int	`json:"status"`
 }
 
+//type Post struct {
+//	PostId string `json: "postId"`
+//	SharingList string `json: "sharingList`
+//}
+
+type Profile struct {
+	Followers        []string `json:"followers"`
+	PendingFollowers []string `json:"pendingFollowers"`
+	Posts            []Asset  `json:"posts"`
+	Username         string   `json: "username"`
+}
+
+//
+//type memberType int
+//
+//const (
+//	follower memberType = iota
+//	blocked
+//	pending
+//)
+//
+////set sharing privileges for each individual user?
+//type channelMember struct {
+//	memberId string
+//	membership memberType
+//}
+//
 //add init function? populate with example posts?
+
 // init function neccessary for adding chaincode to peers. TODO: why neccessary, remove?
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
-	assets := []Asset{
-		{PostId: "hash of the data", Owner: "Hanif", PostDate: "this will be a date soon, use time package?", Poster: "lars"},
-		{PostId: "also a hash, this is easy", Owner: "amish Ringen", PostDate: "will this be date? what is easier", Poster: "Amish Ringen (this will probably be an id or somehting"},
-		{PostId: "hashbrown1", Owner: "Amish Ringen", PostDate: "today", Poster: "Amish Ringen"},
-		{PostId: "hashbrown2", Owner: "Amish Ringen", PostDate: "today", Poster: "Amish Ringen"},
-		{PostId: "hashbrown3", Owner: "Amish Ringen", PostDate: "today", Poster: "Amish Ringen"},
-		{PostId: "hashbrown4", Owner: "Amish Ringen", PostDate: "today", Poster: "Amish Ringen"},
-		{PostId: "hashbrown5", Owner: "Amish Ringen", PostDate: "today", Poster: "Amish Ringen"},
-		{PostId: "hashbrown6", Owner: "Amish Ringen", PostDate: "today", Poster: "Amish Ringen"},
-		{PostId: "hashbrown7", Owner: "Amish Ringen", PostDate: "today", Poster: "Amish Ringen"},
-		{PostId: "hashbrown8", Owner: "Amish Ringen", PostDate: "today", Poster: "Amish Ringen"},
-	}
+	assets := []Asset{}
 
 	for _, asset := range assets {
 		assetJSON, err := json.Marshal(asset)
@@ -55,30 +73,68 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 }
 
 // CreateAsset issues a new asset to the world state with given details.
-func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, id string, owner string, poster string,
-	postDate string) error {
-	//create key here or in application?
-	exists, err := s.AssetExists(ctx, id)
+func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, postId string, owner string, sharingHistory []string) error {
+	id, err := ctx.GetClientIdentity().GetID()
+	exists, err := s.PostExists(ctx, id, postId)
 	if err != nil {
 		return err
 	}
 	if exists {
 		return fmt.Errorf("the asset %s already exists", id)
 	}
-	asset := Asset{
-		//		Depth:		depth,
-		Owner:    owner,
-		PostDate: postDate,
-		Poster:   poster,
-		PostId:   id,
-		//		Status:		status,
+	if sharingHistory == nil {
+		sharingHistory = make([]string, 0)
 	}
-	assetJSON, err := json.Marshal(asset)
+	sharingHistory = append(sharingHistory, id)
+
+	forwardingHistory := make([]string, 0)
+
+	asset := Asset{
+		ForwardingHistory: forwardingHistory,
+		Owner:             owner,
+		PostId:            postId,
+		SharingHistory:    sharingHistory,
+	}
+	profile, err := s.ReadProfile(ctx, id)
 	if err != nil {
 		return err
 	}
+	profile.Posts = append(profile.Posts, asset)
+	profileJson, err := json.Marshal(profile)
+	return ctx.GetStub().PutState(id, profileJson)
+}
 
-	return ctx.GetStub().PutState(id, assetJSON)
+func (s *SmartContract) ShareAsset(ctx contractapi.TransactionContextInterface, owner string, postId string) error {
+	id, err := ctx.GetClientIdentity().GetID()
+	exists, err := s.PostExists(ctx, id, postId)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("the asset %s already exists", id)
+	}
+	profile, err := s.ReadProfile(ctx, owner)
+	/*     if err != nil {
+		return err
+	}
+	var profile Profile
+	json.Unmarshal(profileJson, &profile) */
+	var post Asset
+	var index int
+	for i, item := range profile.Posts {
+		if item.PostId == postId {
+			post = item
+			index = i
+		}
+	}
+	post.ForwardingHistory = append(post.ForwardingHistory, id)
+
+	// TODO: create sharing history restriction for access restriction after a certain number of sharing ops
+	sharingHistory := make([]string, 0)
+	s.CreateAsset(ctx, postId, owner, sharingHistory)
+	profile.Posts[index] = post
+	profileJson, err := json.Marshal(profile)
+	return ctx.GetStub().PutState(id, profileJson)
 }
 
 // ReadAsset returns the asset stored in the world state with given id.
@@ -98,6 +154,24 @@ func (s *SmartContract) ReadAsset(ctx contractapi.TransactionContextInterface, i
 	}
 
 	return &asset, nil
+}
+
+func (s *SmartContract) ReadProfile(ctx contractapi.TransactionContextInterface, id string) (*Profile, error) {
+	profileJson, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read from world state: %v", err)
+	}
+	if profileJson == nil {
+		return nil, fmt.Errorf("the profile %s does not exist", id)
+	}
+
+	var profile Profile
+	err = json.Unmarshal(profileJson, &profile)
+	if err != nil {
+		return nil, err
+	}
+
+	return &profile, nil
 }
 
 //func (s *SmartContract) UpdateAsset(ctx contractapi.TransactionContextInterface, id string, poster string) error {
@@ -128,8 +202,8 @@ func (s *SmartContract) ReadAsset(ctx contractapi.TransactionContextInterface, i
 //}
 //
 // DeleteAsset deletes an given asset from the world state.
-func (s *SmartContract) DeleteAsset(ctx contractapi.TransactionContextInterface, id string) error {
-	exists, err := s.AssetExists(ctx, id)
+/* func (s *SmartContract) DeleteAsset(ctx contractapi.TransactionContextInterface, id string) error {
+	exists, err := s.PostExists(ctx, id, postId)
 	if err != nil {
 		return err
 	}
@@ -138,16 +212,22 @@ func (s *SmartContract) DeleteAsset(ctx contractapi.TransactionContextInterface,
 	}
 
 	return ctx.GetStub().DelState(id)
-}
+} */
 
-// AssetExists returns true when asset with given ID exists in world state
-func (s *SmartContract) AssetExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
-	assetJSON, err := ctx.GetStub().GetState(id)
+// PostExists returns true when asset with given ID exists in world state
+func (s *SmartContract) PostExists(ctx contractapi.TransactionContextInterface, id string, postId string) (bool, error) {
+	profileJson, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return false, fmt.Errorf("failed to read from world state: %v", err)
 	}
-
-	return assetJSON != nil, nil
+	var profile Profile
+	json.Unmarshal(profileJson, &profile)
+	for _, item := range profile.Posts {
+		if item.PostId == postId {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 //figure out functions for changing state of assets such that they can be tracked
