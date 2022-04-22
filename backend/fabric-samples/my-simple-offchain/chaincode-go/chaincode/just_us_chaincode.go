@@ -55,10 +55,10 @@ type Profile struct {
 
 // init function neccessary for adding chaincode to peers. TODO: why neccessary, remove?
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
-	assets := []Asset{}
+	/* assets := []Asset{}
 
 	for _, asset := range assets {
-		assetJSON, err := json.Marshal(asset)
+		profileJson, err := json.Marshal(asset)
 		if err != nil {
 			return err
 		}
@@ -67,13 +67,13 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 		if err != nil {
 			return fmt.Errorf("failed to put to world state. %v", err)
 		}
-	}
+	} */
 
 	return nil
 }
 
-// CreateAsset issues a new asset to the world state with given details.
-func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface, postId string, owner string, sharingHistory []string) error {
+// CreatePost issues a new asset to the world state with given details.
+func (s *SmartContract) CreatePost(ctx contractapi.TransactionContextInterface, postId string, owner string, sharingHistory []string) error {
 	id, err := ctx.GetClientIdentity().GetID()
 	exists, err := s.PostExists(ctx, id, postId)
 	if err != nil {
@@ -104,7 +104,7 @@ func (s *SmartContract) CreateAsset(ctx contractapi.TransactionContextInterface,
 	return ctx.GetStub().PutState(id, profileJson)
 }
 
-func (s *SmartContract) ShareAsset(ctx contractapi.TransactionContextInterface, owner string, postId string) error {
+func (s *SmartContract) SharePost(ctx contractapi.TransactionContextInterface, owner string, postId string) error {
 	id, err := ctx.GetClientIdentity().GetID()
 	exists, err := s.PostExists(ctx, id, postId)
 	if err != nil {
@@ -131,14 +131,14 @@ func (s *SmartContract) ShareAsset(ctx contractapi.TransactionContextInterface, 
 
 	// TODO: create sharing history restriction for access restriction after a certain number of sharing ops
 	sharingHistory := make([]string, 0)
-	s.CreateAsset(ctx, postId, owner, sharingHistory)
+	s.CreatePost(ctx, postId, owner, sharingHistory)
 	profile.Posts[index] = post
 	profileJson, err := json.Marshal(profile)
 	return ctx.GetStub().PutState(id, profileJson)
 }
 
-// ReadAsset returns the asset stored in the world state with given id.
-func (s *SmartContract) ReadAsset(ctx contractapi.TransactionContextInterface, id string) (*Asset, error) {
+// ReadPost returns the asset stored in the world state with given id.
+func (s *SmartContract) ReadPost(ctx contractapi.TransactionContextInterface, id string) (*Asset, error) {
 	assetJSON, err := ctx.GetStub().GetState(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
@@ -172,6 +172,24 @@ func (s *SmartContract) ReadProfile(ctx contractapi.TransactionContextInterface,
 	}
 
 	return &profile, nil
+}
+
+func (s *SmartContract) CreateProfile(ctx contractapi.TransactionContextInterface, id string) error {
+	exists, err := s.ProfileExists(ctx, id)
+	if err != nil {
+		return err
+	}
+	if exists {
+		return fmt.Errorf("the profile %s already exists", id)
+	}
+	profile := &Profile{
+		Followers:        make([]string, 0),
+		PendingFollowers: make([]string, 0),
+		Posts:            make([]Asset, 0),
+		Username:         id,
+	}
+	profileJson, err := json.Marshal(&profile)
+	return ctx.GetStub().PutState(id, profileJson)
 }
 
 //func (s *SmartContract) UpdateAsset(ctx contractapi.TransactionContextInterface, id string, poster string) error {
@@ -230,10 +248,18 @@ func (s *SmartContract) PostExists(ctx contractapi.TransactionContextInterface, 
 	return false, nil
 }
 
+func (s *SmartContract) ProfileExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
+	profileJson, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return false, fmt.Errorf("failed to read from world state: %v", err)
+	}
+	return profileJson != nil, nil
+}
+
 //figure out functions for changing state of assets such that they can be tracked
 // TransferAsset updates the owner field of asset with given id in world state.
 /* func (s *SmartContract) TransferAsset(ctx contractapi.TransactionContextInterface, id string, newOwner string) error {
-	asset, err := s.ReadAsset(ctx, id)
+	asset, err := s.ReadPost(ctx, id)
 	if err != nil {
 		return err
 	}
