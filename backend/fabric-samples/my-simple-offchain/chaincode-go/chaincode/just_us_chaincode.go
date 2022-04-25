@@ -179,6 +179,33 @@ func (s *SmartContract) ReadProfile(ctx contractapi.TransactionContextInterface,
 	return &profile, nil
 }
 
+func (s *SmartContract) FollowProfile(ctx contractapi.TransactionContextInterface, userId string, followId string) error {
+	profile, err := s.ReadProfile(ctx, followId)
+	if err != nil {
+		return err
+	}
+	profile.PendingFollowers = append(profile.PendingFollowers, userId)
+	profileJson, err := json.Marshal(profile)
+	return ctx.GetStub().PutState(followId, profileJson)
+}
+
+func (s *SmartContract) AcceptFollower(ctx contractapi.TransactionContextInterface, userId string, followerId string) error {
+	profile, err := s.ReadProfile(ctx, userId)
+	if err != nil {
+		return err
+	}
+	for i, user := range profile.PendingFollowers {
+		if user == followerId {
+			profile.Followers = append(profile.Followers, profile.PendingFollowers[i])
+			profile.PendingFollowers[i] = profile.PendingFollowers[len(profile.PendingFollowers)-1]
+			profile.PendingFollowers[len(profile.PendingFollowers)-1] = ""
+			profile.PendingFollowers = profile.PendingFollowers[:len(profile.PendingFollowers)-1]
+			return nil
+		}
+	}
+	return fmt.Errorf("User %v not found in pending follower list", followerId)
+}
+
 //create profile if profile does not already exist
 func (s *SmartContract) CreateProfile(ctx contractapi.TransactionContextInterface, id string) error {
 	//Abandoning using clientidentity for the moment, difficult to test
