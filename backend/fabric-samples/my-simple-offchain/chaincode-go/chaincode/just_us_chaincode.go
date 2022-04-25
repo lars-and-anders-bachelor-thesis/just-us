@@ -31,6 +31,7 @@ type Asset struct {
 
 type Profile struct {
 	Followers        []string `json:"followers"`
+	FollowedUsers    []string `json: followedUsers`
 	PendingFollowers []string `json:"pendingFollowers"`
 	Posts            []Asset  `json:"posts"`
 	Username         string   `json: "username"`
@@ -179,13 +180,16 @@ func (s *SmartContract) ReadProfile(ctx contractapi.TransactionContextInterface,
 	return &profile, nil
 }
 
+//FollowProfile adds the followId to the userId's list
+//of followed users and adds userId to followId's list of pending followers
 func (s *SmartContract) FollowProfile(ctx contractapi.TransactionContextInterface, userId string, followId string) error {
-	profile, err := s.ReadProfile(ctx, followId)
+	followProfile, err := s.ReadProfile(ctx, followId)
 	if err != nil {
 		return err
 	}
-	profile.PendingFollowers = append(profile.PendingFollowers, userId)
-	profileJson, err := json.Marshal(profile)
+	//TODO: check if user already sent request
+	followProfile.PendingFollowers = append(followProfile.PendingFollowers, userId)
+	profileJson, err := json.Marshal(followProfile)
 	return ctx.GetStub().PutState(followId, profileJson)
 }
 
@@ -200,9 +204,25 @@ func (s *SmartContract) AcceptFollower(ctx contractapi.TransactionContextInterfa
 			profile.PendingFollowers[i] = profile.PendingFollowers[len(profile.PendingFollowers)-1]
 			profile.PendingFollowers[len(profile.PendingFollowers)-1] = ""
 			profile.PendingFollowers = profile.PendingFollowers[:len(profile.PendingFollowers)-1]
-			return nil
+			profileJson, err := json.Marshal(profile)
+			if err != nil {
+				return err
+			}
+			err = ctx.GetStub().PutState(userId, profileJson)
+			if err != nil {
+				return err
+			}
+
+			followerProfile, err := s.ReadProfile(ctx, followerId)
+			followerProfile.FollowedUsers = append(followerProfile.FollowedUsers, userId)
+			profileJson, err = json.Marshal(followerProfile)
+			if err != nil {
+				return err
+			}
+			return ctx.GetStub().PutState(followerId, profileJson)
 		}
 	}
+
 	return fmt.Errorf("User %v not found in pending follower list", followerId)
 }
 
@@ -289,6 +309,22 @@ func (s *SmartContract) ProfileExists(ctx contractapi.TransactionContextInterfac
 		return false, fmt.Errorf("failed to read from world state: %v", err)
 	}
 	return profileJson != nil, nil
+}
+
+func (s *SmartContract) ReadAllPosts(ctx contractapi.TransactionContextInterface, userId string) ([]Asset, error) {
+	profile, err := s.ReadProfile(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+	assetList := make([]Asset, 0)
+	for _, user := range profile.FollowedUsers {
+		followProfile, err := s.ReadProfile(ctx, user)
+		if err != nil {
+			return nil, err
+		}
+		assetList = append(assetList, followProfile.Posts...)
+	}
+	return assetList, nil
 }
 
 //figure out functions for changing state of assets such that they can be tracked

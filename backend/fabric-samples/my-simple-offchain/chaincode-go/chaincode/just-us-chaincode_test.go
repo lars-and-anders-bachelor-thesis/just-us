@@ -103,6 +103,10 @@ func TestAcceptFollower(t *testing.T) {
 	require.NoError(t, err)
 }
 
+/* func TestReadAllPosts(t *testing.T) {
+
+} */
+
 func createProfile() []byte {
 	post := chaincode.Asset{
 		ForwardingHistory: make([]string, 0),
@@ -112,6 +116,7 @@ func createProfile() []byte {
 	}
 	userProfile := chaincode.Profile{
 		Followers:        make([]string, 0),
+		FollowedUsers:    []string{"anders"},
 		PendingFollowers: []string{"josh"},
 		Posts:            []chaincode.Asset{post},
 		Username:         "anders",
