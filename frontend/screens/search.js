@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import SearchBar from '../components/searchBar';
 import List from '../components/searchList'; 
+import UserPage from './userPage';
+import { useNavigation } from '@react-navigation/native';
+
 import { 
-    StyleSheet,
-    Text,
-    View,
-    SafeAreaView,
-    ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  SafeAreaView,
+  TouchableOpacity,
  } from 'react-native';
 
-export default function Search() {
+export default function Search({navigation}) {
     const [searchPhrase, setSearchPhrase] = useState("");
     const [clicked, setClicked] = useState(false);
     const [fakeData, setFakeData] = useState();
@@ -35,15 +39,12 @@ export default function Search() {
         clicked={clicked}
         setClicked={setClicked}
       />
-      {!fakeData ? (<ActivityIndicator size="large" />) : (
-
           <List
             searchPhrase={searchPhrase}
             data={fakeData}
             setClicked={setClicked}
+            navigation={navigation}
           />
-
-          )}
           </SafeAreaView>
     );
 };
@@ -65,5 +66,5 @@ const styles = StyleSheet.create({
         fontSize: 25,
         fontWeight: "bold",
         marginLeft: "10%",
-      }
+      },
 })
