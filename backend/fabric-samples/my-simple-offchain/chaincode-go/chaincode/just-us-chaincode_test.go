@@ -1,6 +1,7 @@
 package chaincode_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/hanifff/fabric-samples/my-off-cc/chaincode-go/chaincode"
@@ -24,13 +25,75 @@ func TestCreateProfile(t *testing.T) {
 	chaincodeStub := &mocks.ChaincodeStub{}
 	transactionContext := &mocks.TransactionContext{}
 	transactionContext.GetStubReturns(chaincodeStub)
+	userId := "anders ringen"
 
 	chaincodeStub.GetStateReturns(nil, nil)
 	smartContract := chaincode.SmartContract{}
-	err := smartContract.CreateProfile(transactionContext, "lars123")
+	err := smartContract.CreateProfile(transactionContext, userId)
 	require.NoError(t, err)
 
 	chaincodeStub.GetStateReturns([]byte{}, nil)
-	err = smartContract.CreateProfile(transactionContext, "anders")
-	require.EqualError(t, err, "the profile anders already exists")
+	err = smartContract.CreateProfile(transactionContext, userId)
+	require.EqualError(t, err, "the profile anders ringen already exists")
+}
+
+func TestCreatePost(t *testing.T) {
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	userProfileJson := createProfile()
+	smartContract := chaincode.SmartContract{}
+
+	chaincodeStub.GetStateReturns(userProfileJson, nil)
+	err := smartContract.CreatePost(transactionContext, "post2", "knutis", make([]string, 0))
+	require.NoError(t, err)
+
+	err = smartContract.CreatePost(transactionContext, "post1", "knutis", make([]string, 0))
+	require.EqualError(t, err, "the asset post1 already exists")
+}
+
+/* func TestSharePost(t *testing.T) {
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	userProfileJson := createProfile()
+	smartContract := chaincode.SmartContract{}
+
+
+	chaincodeStub.GetStateReturns(userProfileJson, nil)
+	err := smartContract.SharePost()
+} */
+
+func TestReadPost(t *testing.T) {
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	userProfileJson := createProfile()
+	smartContract := chaincode.SmartContract{}
+
+	chaincodeStub.GetStateReturns(userProfileJson, nil)
+	_, err := smartContract.ReadPost(transactionContext, "id", "post1")
+	require.NoError(t, err)
+
+	_, err = smartContract.ReadPost(transactionContext, "id", "post2")
+	require.EqualError(t, err, "post not found")
+
+}
+
+func createProfile() []byte {
+	post := chaincode.Asset{
+		ForwardingHistory: make([]string, 0),
+		Owner:             "knutis",
+		PostId:            "post1",
+		SharingHistory:    make([]string, 0),
+	}
+	userProfile := chaincode.Profile{
+		Followers:        make([]string, 0),
+		PendingFollowers: make([]string, 0),
+		Posts:            []chaincode.Asset{post},
+		Username:         "anders",
+	}
+	userProfileJson, _ := json.Marshal(userProfile)
+
+	return userProfileJson
 }

@@ -73,52 +73,47 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 }
 
 // CreatePost issues a new asset to the world state with given details.
-func (s *SmartContract) CreatePost(ctx contractapi.TransactionContextInterface, postId string, owner string, sharingHistory []string) error {
-	id, err := ctx.GetClientIdentity().GetID()
-	exists, err := s.PostExists(ctx, id, postId)
+func (s *SmartContract) CreatePost(ctx contractapi.TransactionContextInterface, postId string, userId string, sharingHistory []string) error {
+	//id, err := ctx.GetClientIdentity().GetID()
+	exists, err := s.PostExists(ctx, userId, postId)
 	if err != nil {
 		return err
 	}
 	if exists {
-		return fmt.Errorf("the asset %s already exists", id)
+		return fmt.Errorf("the asset %s already exists", postId)
 	}
 	if sharingHistory == nil {
 		sharingHistory = make([]string, 0)
 	}
-	sharingHistory = append(sharingHistory, id)
+	//sharingHistory = append(sharingHistory, userId)
 
 	forwardingHistory := make([]string, 0)
 
 	asset := Asset{
 		ForwardingHistory: forwardingHistory,
-		Owner:             owner,
+		Owner:             userId,
 		PostId:            postId,
 		SharingHistory:    sharingHistory,
 	}
-	profile, err := s.ReadProfile(ctx, id)
+	profile, err := s.ReadProfile(ctx, userId)
 	if err != nil {
 		return err
 	}
 	profile.Posts = append(profile.Posts, asset)
 	profileJson, err := json.Marshal(profile)
-	return ctx.GetStub().PutState(id, profileJson)
+	return ctx.GetStub().PutState(userId, profileJson)
 }
 
-func (s *SmartContract) SharePost(ctx contractapi.TransactionContextInterface, owner string, postId string) error {
-	id, err := ctx.GetClientIdentity().GetID()
-	exists, err := s.PostExists(ctx, id, postId)
+func (s *SmartContract) SharePost(ctx contractapi.TransactionContextInterface, owner string, postId string, userId string) error {
+	//id, err := ctx.GetClientIdentity().GetID()
+	exists, err := s.PostExists(ctx, userId, postId)
 	if err != nil {
 		return err
 	}
 	if exists {
-		return fmt.Errorf("the asset %s already exists", id)
+		return fmt.Errorf("the asset %s already exists", userId)
 	}
 	profile, err := s.ReadProfile(ctx, owner)
-	/*     if err != nil {
-		return err
-	}
-	var profile Profile
-	json.Unmarshal(profileJson, &profile) */
 	var post Asset
 	var index int
 	for i, item := range profile.Posts {
@@ -127,33 +122,43 @@ func (s *SmartContract) SharePost(ctx contractapi.TransactionContextInterface, o
 			index = i
 		}
 	}
-	post.ForwardingHistory = append(post.ForwardingHistory, id)
+	post.SharingHistory = append(post.ForwardingHistory, userId)
 
-	// TODO: create sharing history restriction for access restriction after a certain number of sharing ops
+	// TODO: create sharing restriction after a certain number of sharing ops
 	sharingHistory := make([]string, 0)
-	s.CreatePost(ctx, postId, owner, sharingHistory)
+	s.CreatePost(ctx, postId, userId, sharingHistory)
 	profile.Posts[index] = post
 	profileJson, err := json.Marshal(profile)
-	return ctx.GetStub().PutState(id, profileJson)
+	return ctx.GetStub().PutState(userId, profileJson)
 }
 
 // ReadPost returns the asset stored in the world state with given id.
-func (s *SmartContract) ReadPost(ctx contractapi.TransactionContextInterface, id string) (*Asset, error) {
-	assetJSON, err := ctx.GetStub().GetState(id)
+func (s *SmartContract) ReadPost(ctx contractapi.TransactionContextInterface, userId string, postId string) (*Asset, error) {
+	/* 	assetJSON, err := ctx.GetStub().GetState(id)
+	   	if err != nil {
+	   		return nil, fmt.Errorf("failed to read from world state: %v", err)
+	   	}
+	   	if assetJSON == nil {
+	   		return nil, fmt.Errorf("the asset %s does not exist", id)
+	   	}
+
+	   	var asset Asset
+	   	err = json.Unmarshal(assetJSON, &asset)
+	   	if err != nil {
+	   		return nil, err
+	   	} */
+	profileJson, err := ctx.GetStub().GetState(userId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read from world state: %v", err)
 	}
-	if assetJSON == nil {
-		return nil, fmt.Errorf("the asset %s does not exist", id)
+	var profile Profile
+	json.Unmarshal(profileJson, &profile)
+	for _, item := range profile.Posts {
+		if item.PostId == postId {
+			return &item, nil
+		}
 	}
-
-	var asset Asset
-	err = json.Unmarshal(assetJSON, &asset)
-	if err != nil {
-		return nil, err
-	}
-
-	return &asset, nil
+	return nil, fmt.Errorf("post not found")
 }
 
 func (s *SmartContract) ReadProfile(ctx contractapi.TransactionContextInterface, id string) (*Profile, error) {
@@ -174,7 +179,10 @@ func (s *SmartContract) ReadProfile(ctx contractapi.TransactionContextInterface,
 	return &profile, nil
 }
 
+//create profile if profile does not already exist
 func (s *SmartContract) CreateProfile(ctx contractapi.TransactionContextInterface, id string) error {
+	//Abandoning using clientidentity for the moment, difficult to test
+	//id, err := ctx.GetClientIdentity().GetID()
 	exists, err := s.ProfileExists(ctx, id)
 	if err != nil {
 		return err
@@ -274,7 +282,7 @@ func (s *SmartContract) ProfileExists(ctx contractapi.TransactionContextInterfac
 } */
 
 // GetAllAssets returns all assets found in world state
-func (s *SmartContract) GetAllAssets(ctx contractapi.TransactionContextInterface) ([]*Asset, error) {
+/* func (s *SmartContract) GetAllPosts(ctx contractapi.TransactionContextInterface) ([]*Asset, error) {
 	// range query with empty string for startKey and endKey does an
 	// open-ended query of all assets in the chaincode namespace.
 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
@@ -299,4 +307,4 @@ func (s *SmartContract) GetAllAssets(ctx contractapi.TransactionContextInterface
 	}
 
 	return assets, nil
-}
+} */
