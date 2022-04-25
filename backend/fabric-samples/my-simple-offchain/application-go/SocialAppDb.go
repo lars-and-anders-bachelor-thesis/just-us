@@ -69,24 +69,24 @@ func (oc *OffchainDB) InsertData(ID string, offdata string) error {
 
 // ReadData reads data from the Offchain database.
 // ID: Transaction ID which links data to blockchain
-func (oc *OffchainDB) ReadData(ID string) error {
+func (oc *OffchainDB) ReadData(ID string) (string, error) {
 	results, err := oc.Conn.Query("SELECT Offdata FROM linkdata where ID=?", ID)
 	if err != nil {
 		fmt.Printf("Something went wrong while trying to select from database.\n%v", err)
-		return err
+		return "", err
 	}
 	defer results.Close()
+	var links Linkdata
 	for results.Next() {
-		var links Linkdata
 		// for each row, scan the result into our tag composite object
 		err = results.Scan(&links.Data)
 		if err != nil {
 			fmt.Printf("Something went wrong while casting data to the composite object.\n%v", err)
-			return err
+			return "", err
 		}
 		log.Printf("DATA: %s\n", links.Data)
 	}
-	return nil
+	return links.Data, nil
 }
 
 // ReadAllData reads all data stored in the Offchain database.

@@ -28,60 +28,96 @@ var contract *gateway.Contract
 
 //var contract *gateway.Contract
 
-type Asset struct {
-	Data string `json:"data"`
-	//        Depth           int     `json:"depth"`
-	Owner    string `json:"owner"`
-	PostDate string `json:"postDate"`
-	Poster   string `json:"poster"`
-	PostId   string `json:"postId"`
+type Post struct {
+	Data   string `json:"data"`
+	Owner  string `json:"owner"`
+	PostId string `json:"postId"`
+	//Depth           int     `json:"depth"`
+	//PostDate string `json:"postDate"`
+	//Poster   string `json:"poster"`
 	//Status          int     `json:"status"`
+}
+
+type Login struct {
+	Username string `json: "username"`
+	Password string `json: "password"`
 }
 
 func handleRequests() {
 	r := mux.NewRouter().StrictSlash(true)
 	r.HandleFunc("/Posts", getAllPosts)
 	r.HandleFunc("/Post", createPost).Methods("POST")
+	r.HandleFunc("/User", signUp)
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 func getAllPosts(w http.ResponseWriter, r *http.Request) {
 	log.Println("--> Endpoint Hit: getAllPosts")
-	log.Println("--> Evaluate Transaction: GetAllAssets")
+	log.Println("--> Evaluate Transaction: GetAllPosts")
 	//finn alle posts du kan se for en bruker
 	//		network, err := configNet()
-	/* 		contract := network.GetContract("basic")
-	res, err := contract.EvaluateTransaction("GetAllAssets")
+	//		contract := network.GetContract("basic")
+	postsJson, err := contract.EvaluateTransaction("GetAllPosts", "lars")
 	if err != nil {
 		log.Fatalf("Failed to evaluate transaction: %v", err)
-	} */
+	}
+	var posts []Post
+	json.Unmarshal(postsJson, &posts)
+	var postData string
+	for i, val := range posts {
+		postData, err = db.ReadData(val.PostId)
+		if err != nil {
+			log.Fatalf("failed to read from db: %v", err)
+		}
+		posts[i].Data = postData
+	}
+	postsJson, err = json.Marshal(posts)
+	if err != nil {
+		log.Fatalf("failed to marshal post: %v", err)
+	}
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 	//create db function for fetching full posts from database
-	_, result := db.ReadAllData()
-	finalResult, _ := json.Marshal(result)
-	w.Write(finalResult)
-
+	/* 	_, result := db.ReadAllData()
+	   	finalResult, _ := json.Marshal(result) */
+	w.Write(postsJson)
 }
 
 func createPost(w http.ResponseWriter, r *http.Request) {
 	log.Println("--> Endpoint Hit: createPost")
 	body, _ := ioutil.ReadAll(r.Body)
-	var post Asset
+	var post Post
 	json.Unmarshal(body, &post)
 	post.PostId = hashTxn(post.Data)
-	post.PostDate = "today"
-	post.Poster = post.Owner
+
+	//post.PostDate = "today"
+	//post.Poster = post.Owner
+	//TODO: marshaling arrays
+	//emptySharingHistory := make([]string, 0)
 	log.Printf("received data: %v", post.Data)
-	_, err := contract.EvaluateTransaction("CreateAsset", post.PostId, post.Owner, post.Poster, post.PostDate)
+	_, err := contract.SubmitTransaction("CreatePost", post.PostId, post.Owner, "") //, post.Poster, post.PostDate)
 	if err != nil {
-		log.Fatalf("Failed to evaluate transaction: %v", err)
+		log.Fatalf("Failed to submit transaction: %v", err)
 	}
 	err = db.InsertData(post.PostId, post.Data)
 	if err != nil {
 		log.Printf("%v\n", err)
 		return
 	}
+}
+
+//TODO: check if user exists before adding + password protection
+func signUp(w http.ResponseWriter, r *http.Request) {
+	log.Println("--> Endpoint hit: signUp")
+	body, _ := ioutil.ReadAll(r.Body)
+	var loginInfo Login
+	json.Unmarshal(body, &loginInfo)
+	log.Printf("--> Sign up user %v", loginInfo.Username)
+	_, err := contract.SubmitTransaction("CreateProfile", loginInfo.Username)
+	if err != nil {
+		log.Fatalf("failed to create profile: %v", err)
+	}
+	log.Printf("--> success!")
 }
 
 func main() {
@@ -94,21 +130,34 @@ func main() {
 	}
 	defer db.Conn.Close()
 	contract = network.GetContract("basic")
-	// store the data along with its hash in the database
-	result, err := contract.EvaluateTransaction("GetAllAssets")
-	if err != nil {
-		log.Fatalf("Failed to evaluate transaction: %v", err)
-	}
+
 	_, res := db.ReadAllData()
-	log.Print(len(*res))
+	log.Printf("Amounts of posts in db: %v", len(*res))
 	if len(*res) == 0 {
-		initData := &[10]Asset{}
-		err = json.Unmarshal(result, initData)
+		post1 := Post{
+			Data:   "hello world!! this is my first post tee hee",
+			Owner:  "anders",
+			PostId: "1",
+		}
+		post2 := Post{
+			Data:   "this is my second post, for all my followers!",
+			Owner:  "anders",
+			PostId: "2",
+		}
+		initData := []Post{post1, post2}
 		log.Printf("creating list?")
 		if err != nil {
 			log.Fatalf("oinkers, anders failed! %v", err)
 		}
 		err = initDb(initData)
+		if err == nil {
+			_, err = contract.SubmitTransaction("InitLedger")
+			if err != nil {
+				fmt.Errorf("error submitting chaincode transaction: %v", err)
+			}
+		} else {
+			fmt.Errorf("there was an error initializing db: %v", err)
+		}
 	}
 
 	handleRequests()
@@ -180,12 +229,11 @@ func main() {
 	//	log.Println("============ Done ============")
 }
 
-func initDb(initData *[10]Asset) error {
+func initDb(initData []Post) error {
 	for _, val := range initData {
-		ID := hashTxn(val.PostId)
-		log.Printf(ID)
-		err = db.InsertData(ID, "Id cumque voluptas quasi accusantium veniam qui. hilsen "+val.Owner)
-		log.Printf("fail here?")
+		//ID := hashTxn(val.PostId)
+		//log.Printf(ID)
+		err = db.InsertData(val.PostId, val.Data)
 		if err != nil {
 			log.Printf("%v\n", err)
 			return err
@@ -299,12 +347,12 @@ func hashTxn(data string) string {
 // verifyTxn verifies connection between a Transaction on chain and its data in database
 func verifyTxn(txid string, contract *gateway.Contract, db *OffchainDB) {
 	log.Printf("--> Evaluate Transaction!")
-	result, err := contract.EvaluateTransaction("ReadAsset", txid)
+	result, err := contract.EvaluateTransaction("ReadPost", txid)
 	if err != nil {
 		log.Fatalf("Failed to evaluate transaction: %v", err)
 	}
 	log.Printf("Transaction %s, is verfied!\n", string(result))
-	err = db.ReadData(txid)
+	_, err = db.ReadData(txid)
 	if err != nil {
 		log.Printf("%v", err)
 		return

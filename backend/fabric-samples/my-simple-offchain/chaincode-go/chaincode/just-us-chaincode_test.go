@@ -50,6 +50,9 @@ func TestCreatePost(t *testing.T) {
 
 	err = smartContract.CreatePost(transactionContext, "post1", "knutis", make([]string, 0))
 	require.EqualError(t, err, "the asset post1 already exists")
+
+	err = smartContract.CreatePost(transactionContext, "post2", "knutis", nil)
+	require.NoError(t, err)
 }
 
 /* func TestSharePost(t *testing.T) {
@@ -103,9 +106,17 @@ func TestAcceptFollower(t *testing.T) {
 	require.NoError(t, err)
 }
 
-/* func TestReadAllPosts(t *testing.T) {
+func TestReadAllPosts(t *testing.T) {
+	chaincodeStub := &mocks.ChaincodeStub{}
+	transactionContext := &mocks.TransactionContext{}
+	transactionContext.GetStubReturns(chaincodeStub)
+	userProfileJson := createProfile()
+	smartContract := chaincode.SmartContract{}
 
-} */
+	chaincodeStub.GetStateReturns(userProfileJson, nil)
+	_, err := smartContract.GetAllPosts(transactionContext, "anders")
+	require.NoError(t, err)
+}
 
 func createProfile() []byte {
 	post := chaincode.Asset{

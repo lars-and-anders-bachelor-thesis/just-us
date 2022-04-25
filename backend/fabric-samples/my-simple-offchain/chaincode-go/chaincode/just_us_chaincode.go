@@ -56,19 +56,44 @@ type Profile struct {
 
 // init function neccessary for adding chaincode to peers. TODO: why neccessary, remove?
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
-	/* assets := []Asset{}
-
-	for _, asset := range assets {
+	postList := make([]Asset, 0)
+	postList = append(postList, Asset{
+		ForwardingHistory: make([]string, 0),
+		SharingHistory:    make([]string, 0),
+		PostId:            "1",
+		Owner:             "anders"})
+	postList = append(postList, Asset{
+		ForwardingHistory: make([]string, 0),
+		SharingHistory:    make([]string, 0),
+		PostId:            "2",
+		Owner:             "anders",
+	})
+	userProfile := Profile{
+		Followers:        []string{"lars"},
+		FollowedUsers:    []string{"anders"},
+		PendingFollowers: make([]string, 0),
+		Posts:            postList,
+		Username:         "anders",
+	}
+	userProfile2 := Profile{
+		Followers:        []string{"anders"},
+		FollowedUsers:    []string{"lars"},
+		PendingFollowers: make([]string, 0),
+		Posts:            postList,
+		Username:         "lars",
+	}
+	profileList := []Profile{userProfile, userProfile2}
+	for _, asset := range profileList {
 		profileJson, err := json.Marshal(asset)
 		if err != nil {
 			return err
 		}
 
-		err = ctx.GetStub().PutState(asset.PostId, assetJSON)
+		err = ctx.GetStub().PutState(asset.Username, profileJson)
 		if err != nil {
 			return fmt.Errorf("failed to put to world state. %v", err)
 		}
-	} */
+	}
 
 	return nil
 }
