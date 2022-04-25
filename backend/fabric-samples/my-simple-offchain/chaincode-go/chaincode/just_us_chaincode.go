@@ -311,7 +311,7 @@ func (s *SmartContract) ProfileExists(ctx contractapi.TransactionContextInterfac
 	return profileJson != nil, nil
 }
 
-func (s *SmartContract) ReadAllPosts(ctx contractapi.TransactionContextInterface, userId string) ([]Asset, error) {
+func (s *SmartContract) GetAllPosts(ctx contractapi.TransactionContextInterface, userId string) ([]Asset, error) {
 	profile, err := s.ReadProfile(ctx, userId)
 	if err != nil {
 		return nil, err
