@@ -26,6 +26,7 @@ const Item = ({ name, details, navigation}) => (
 const List = ({ searchPhrase, setClicked, data, navigation }) => {
   const renderItem = ({ item }) => {
     // when no input, show all
+    // HER TENKER JEG DU KAN SKRIVE EN FIN GET REQUEST FRA SEARCHPHRASEN
     if (searchPhrase === "") {
       return <Item name={item.name} details={item.details} navigation={navigation}/>;
     }

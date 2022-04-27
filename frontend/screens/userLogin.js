@@ -11,31 +11,19 @@ import {
     TouchableOpacity,
  } from 'react-native';
 
-export default function CreateUser() {
+export default function UserLogin() {
     const {signIn} = React.useContext(AuthContext);
 
     const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
 
-    async function Submit()
-    {   
-
-        try{
-            fetch('http://152.94.171.1:8080/User', {
-                method: 'POST',
-                body: JSON.stringify({username: username["username"], password: password["password"]})
-            });
-            await AsyncStorage.setItem('storageUsername', username["username"])
-            alert("Username: "+username["username"]+"\nPassword: "+password["password"]+"\nWelcome to Just Us <3");
-            signIn();
-        }catch{
-            console.log("ay dette funka visst ikke kompis")
-        }
+    async function Submit() {
+        await AsyncStorage.setItem('storageUsername', username["username"])
+        signIn();
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Register User</Text>
+            <Text style={styles.header}>Log into your user</Text>
 
             <TextInput style={styles.textinput} placeholder="Your username" 
              onChangeText={(text)=> setUsername({username: text})}
@@ -48,7 +36,7 @@ export default function CreateUser() {
              underlineColorAndroid={'transparent'} ></TextInput>
 
             <TouchableOpacity style={styles.button} onPress={ () => Submit()}>
-                <Text style={styles.btntxt}>Sign up here and log in</Text>
+                <Text style={styles.btntxt}>Log in</Text>
             </TouchableOpacity>
         </View>
     )

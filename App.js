@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Login from './frontend/screens/login';
 import CreateUser from './frontend/screens/createUser';
+import UserLogin from './frontend/screens/userLogin';
 import Splash from './frontend/screens/splash';
 import MyTabs from './frontend/customNavigation/myTabs';
 import 'react-native-gesture-handler'
@@ -51,6 +52,7 @@ export default function App() {
           <Stack.Navigator>
             <Stack.Screen name="Login" component={Login} options={{headerShown: false}}/> 
             <Stack.Screen name="CreateUser" component={CreateUser}/> 
+            <Stack.Screen name="LoginUser" component={UserLogin}/> 
           </Stack.Navigator>
         )}
       </NavigationContainer>

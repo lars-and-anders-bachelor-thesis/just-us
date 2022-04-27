@@ -1,5 +1,6 @@
 import React from 'react';
-import { Entypo } from '@expo/vector-icons';
+
+import Icon from 'react-native-vector-icons/FontAwesome';
 import { 
     StyleSheet,
     Text,
@@ -9,15 +10,58 @@ import {
     Button,
     TouchableOpacity,
     Dimensions,
+    FlatList,
  } from 'react-native';
+
+const fakeUsernames = [
+    {
+        id: '1',
+        first: 'Peter',
+        second: 'Lars',
+        // third: 'caker',
+    },
+    {
+        id: '2',
+        first: 'Peter',
+        second: 'Lars',
+        third: 'Amish'
+    },
+    {
+        id: '3',
+        first: 'Peter',
+    },
+];
 
 export default function Privacy({ navigation }) {
     return (
-        <View style={styles.container}>
-            <TouchableOpacity style={styles.button} onPress={ () => navigation.navigate("Tree")}>
-                <Text style={styles.btntxt}>Check out the forwarding tree for this post</Text>
-            </TouchableOpacity>
-        </View>
+            <FlatList
+            data={fakeUsernames}
+            keyExtractor={item => item.id}
+            renderItem={({item}) => (
+                <View style={styles.container}>
+                    <Text>Postid: {item.id}</Text>
+                <View style={styles.arrowUser}>
+                    <Icon name="arrow-right" size={20} style={styles.arrow}/>
+                    <Text>{item.first}</Text>
+                </View>
+                 {item.second &&
+                    (<View style={styles.arrowUser}>
+                        <Icon name="arrow-right" size={20} style={styles.arrow}/>
+                        <Text>{item.second}</Text>
+                    </View>)
+                 }
+                 {item.third &&
+                    (<View style={styles.arrowUser}>
+                        <Icon name="arrow-right" size={20} style={styles.arrow}/>
+                        <TouchableOpacity>
+                            <Text>{item.third}</Text>
+                        </TouchableOpacity>
+                    </View>)
+                 }
+                </View>
+            )}
+            >
+            </FlatList>
     )
 }
 
@@ -25,9 +69,10 @@ const styles = StyleSheet.create({
     container: {
         padding: 50, // this is not best pratice
         flex: 1,
+        flexDirection: 'row',
         backgroundColor: "#fff",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: 'space-between',
       },
     button: {
         alignSelf: 'stretch',
@@ -40,5 +85,13 @@ const styles = StyleSheet.create({
     btntxt: {
         color: '#fff',
         fontWeight: 'bold',
-    }
+    },
+    arrow: {
+        color: 'black',
+    },
+    arrowUser: {
+        flex: 1,
+        flexDirection: 'row',
+        paddingLeft: 30,
+    },
 })

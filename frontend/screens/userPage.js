@@ -16,15 +16,11 @@ export default function UserPage() {
           <View style={styles.header}></View>
           <Image style={styles.avatar} source={{uri: 'https://bootdey.com/img/Content/avatar/avatar6.png'}}/>
           <View style={styles.body}>
-            <View style={styles.bodyContent}>
-              <Text style={styles.name}>John Doe</Text>
-              <Text style={styles.info}>UX Designer / Mobile developer</Text>
-              <Text style={styles.description}>Lorem ipsum dolor sit amet, saepe sapientem eu nam. Qui ne assum electram expetendis, omittam deseruisse consequuntur ius an,</Text>
-              
-              <TouchableOpacity style={styles.followBtn} onPress={() => alert("You know follow Mr.Bert")}>
-                <Text style={styles.loginText} >FOLLOW</Text>
+            <View style={styles.bodyContent}>              
+              <Text style={styles.name}>Andreas</Text>
+              <TouchableOpacity style={styles.followBtn} onPress={() => alert("You now follow Mr.Bert")}>
+                <Text style={styles.loginText}>FOLLOW</Text>
               </TouchableOpacity>
-
             </View>
         </View>
           </View>
@@ -56,7 +52,7 @@ const styles = StyleSheet.create({
     marginTop:40,
   },
   bodyContent: {
-    flex: 1,
+    // flex: 1,
     alignItems: 'center',
     padding:30,
   },
@@ -81,7 +77,7 @@ const styles = StyleSheet.create({
   },
   description:{
     fontSize:16,
-    color: "#696969",
+    color: "black",
     marginTop:10,
     textAlign: 'center'
   },
@@ -99,6 +95,12 @@ const styles = StyleSheet.create({
   logout_btn: {
       position: 'absolute',
       bottom: 0,
+  },
+  name: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 30,
+    paddingTop: 15,
   }
 });
 

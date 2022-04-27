@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { AuthContext } from '../context/context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
     StyleSheet,
     Text,
@@ -10,14 +11,18 @@ import {
     TouchableOpacity,
  } from 'react-native';
 
+ 
+
+ 
 export default function Login({ navigation }) {
-    const {signIn} = React.useContext(AuthContext);
+
+
     return (
         <View style={styles.container}>
             <Text style={styles.h1}>Just us</Text>
             <Image style={styles.image} source={require("../assets/lock.png")} />
 
-            <TouchableOpacity style={styles.loginBtn} onPress={() => signIn()}>
+            <TouchableOpacity style={styles.loginBtn} onPress={() => navigation.navigate("LoginUser")}>
                 <Text style={styles.loginText} >LOGIN</Text>
             </TouchableOpacity>
 

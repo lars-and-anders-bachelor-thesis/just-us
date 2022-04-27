@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'react-native-axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
     StyleSheet,
     Text,
@@ -56,7 +57,7 @@ import { registerRootComponent } from 'expo';
                     source={{
                         uri: DATA[3].feed_image,
                     }}/>
-                    <Text style={styles.userName}>{item.id}</Text>
+                    <Text style={styles.userName}>{item.owner}</Text>
                 </View>
                 <View style={styles.header_Right}>
                     <Icon name="ellipsis-h" style={styles.kake}/>
@@ -67,7 +68,7 @@ import { registerRootComponent } from 'expo';
                     source={{
                         uri: DATA[3].feed_image,
             }}/> */}
-            <Text>{item.Data}</Text>
+            <Text>{item.data}</Text>
             <View style={styles.card_Footer}>
                 <View style={styles.footer_Left}>
                     <View style={styles.footer_Left}>
@@ -98,8 +99,9 @@ import { registerRootComponent } from 'expo';
     const [loading, setLoading] = useState(true);
     
     const fetchData = async () => {
-        let resp;
-        const resp0nse = await axios.get('http://152.94.171.1:8080/Posts')
+        let resp;  
+        const user = await AsyncStorage.getItem('storageUsername')
+        const resp0nse = await axios.get('http://152.94.171.1:8080/Posts?username='+user) // /User
         .then(function (response) {
             // handle success
             resp = response.data;
