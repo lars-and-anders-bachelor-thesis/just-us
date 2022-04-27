@@ -99,7 +99,7 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 }
 
 // CreatePost issues a new asset to the world state with given details.
-func (s *SmartContract) CreatePost(ctx contractapi.TransactionContextInterface, postId string, userId string, sharingHistory []string) error {
+func (s *SmartContract) CreatePost(ctx contractapi.TransactionContextInterface, postId string, userId string) error {
 	//id, err := ctx.GetClientIdentity().GetID()
 	exists, err := s.PostExists(ctx, userId, postId)
 	if err != nil {
@@ -108,11 +108,8 @@ func (s *SmartContract) CreatePost(ctx contractapi.TransactionContextInterface, 
 	if exists {
 		return fmt.Errorf("the asset %s already exists", postId)
 	}
-	if sharingHistory == nil {
-		sharingHistory = make([]string, 0)
-	}
-	//sharingHistory = append(sharingHistory, userId)
 
+	sharingHistory := make([]string, 0)
 	forwardingHistory := make([]string, 0)
 
 	asset := Asset{
@@ -151,8 +148,8 @@ func (s *SmartContract) SharePost(ctx contractapi.TransactionContextInterface, o
 	post.SharingHistory = append(post.ForwardingHistory, userId)
 
 	// TODO: create sharing restriction after a certain number of sharing ops
-	sharingHistory := make([]string, 0)
-	s.CreatePost(ctx, postId, userId, sharingHistory)
+	//sharingHistory := make([]string, 0)
+	s.CreatePost(ctx, postId, userId)
 	profile.Posts[index] = post
 	profileJson, err := json.Marshal(profile)
 	return ctx.GetStub().PutState(userId, profileJson)
@@ -205,16 +202,39 @@ func (s *SmartContract) ReadProfile(ctx contractapi.TransactionContextInterface,
 	return &profile, nil
 }
 
-//FollowProfile adds the followId to the userId's list
-//of followed users and adds userId to followId's list of pending followers
+// PostExists returns true when asset with given ID exists in world state
+func (s *SmartContract) PostExists(ctx contractapi.TransactionContextInterface, id string, postId string) (bool, error) {
+	profileJson, err := ctx.GetStub().GetState(id)
+	if err != nil {
+		return false, fmt.Errorf("failed to read from world state: %v", err)
+	}
+	var profile Profile
+	json.Unmarshal(profileJson, &profile)
+	if profileJson == nil {
+		return false, fmt.Errorf("user %v does not exist", id)
+	}
+	for _, item := range profile.Posts {
+		if item.PostId == postId {
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
+//FollowProfile adds userId to followId's list of pending followers
 func (s *SmartContract) FollowProfile(ctx contractapi.TransactionContextInterface, userId string, followId string) error {
 	followProfile, err := s.ReadProfile(ctx, followId)
 	if err != nil {
 		return err
 	}
 	//TODO: check if user already sent request
+	for _, val := range followProfile.PendingFollowers {
+		if val == followId {
+			return fmt.Errorf("Request already pending")
+		}
+	}
 	followProfile.PendingFollowers = append(followProfile.PendingFollowers, userId)
-	profileJson, err := json.Marshal(followProfile)
+	profileJson, _ := json.Marshal(followProfile)
 	return ctx.GetStub().PutState(followId, profileJson)
 }
 
@@ -269,6 +289,9 @@ func (s *SmartContract) CreateProfile(ctx contractapi.TransactionContextInterfac
 		Username:         id,
 	}
 	profileJson, err := json.Marshal(&profile)
+	if err != nil {
+		return err
+	}
 	return ctx.GetStub().PutState(id, profileJson)
 }
 
@@ -312,22 +335,6 @@ func (s *SmartContract) CreateProfile(ctx contractapi.TransactionContextInterfac
 	return ctx.GetStub().DelState(id)
 } */
 
-// PostExists returns true when asset with given ID exists in world state
-func (s *SmartContract) PostExists(ctx contractapi.TransactionContextInterface, id string, postId string) (bool, error) {
-	profileJson, err := ctx.GetStub().GetState(id)
-	if err != nil {
-		return false, fmt.Errorf("failed to read from world state: %v", err)
-	}
-	var profile Profile
-	json.Unmarshal(profileJson, &profile)
-	for _, item := range profile.Posts {
-		if item.PostId == postId {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
 func (s *SmartContract) ProfileExists(ctx contractapi.TransactionContextInterface, id string) (bool, error) {
 	profileJson, err := ctx.GetStub().GetState(id)
 	if err != nil {
@@ -370,7 +377,7 @@ func (s *SmartContract) GetAllPosts(ctx contractapi.TransactionContextInterface,
 } */
 
 // GetAllAssets returns all assets found in world state
-/* func (s *SmartContract) GetAllPosts(ctx contractapi.TransactionContextInterface) ([]*Asset, error) {
+/*  func (s *SmartContract) GetAllAssets(ctx contractapi.TransactionContextInterface) ([]*Asset, error) {
 	// range query with empty string for startKey and endKey does an
 	// open-ended query of all assets in the chaincode namespace.
 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
@@ -395,4 +402,4 @@ func (s *SmartContract) GetAllPosts(ctx contractapi.TransactionContextInterface,
 	}
 
 	return assets, nil
-} */
+}  */

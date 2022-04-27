@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gorilla/mux"
@@ -13,7 +14,6 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"os"
 	"strings"
 
 	"github.com/hyperledger/fabric-sdk-go/pkg/core/config"
@@ -25,8 +25,6 @@ var err error
 var db *OffchainDB
 var network *gateway.Network
 var contract *gateway.Contract
-
-//var contract *gateway.Contract
 
 type Post struct {
 	Data   string `json:"data"`
@@ -43,23 +41,78 @@ type Login struct {
 	Password string `json: "password"`
 }
 
+type UserQuery struct {
+	UserId  string `json:"userId"`
+	QueryId string `json: "queryId"`
+}
+
 func handleRequests() {
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/Posts", getAllPosts)
+	//	r.HandleFunc("/Posts", getAllPosts)
 	r.HandleFunc("/Post", createPost).Methods("POST")
-	r.HandleFunc("/User", signUp)
+	r.HandleFunc("/User", signUp).Methods("POST")
+	r.HandleFunc("/Posts", getAllPosts).Queries("username", "{username}").Methods("GET")
+	r.HandleFunc("/Users/search", searchUser).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
+
+func followUser(w http.ResponseWriter, r *http.Request) {
+	log.Println("--> Endpoint Hit: followUser")
+	body, _ := ioutil.ReadAll(r.Body)
+
+	var followRequest UserQuery
+	json.Unmarshal(body, &followRequest)
+	log.Printf("sending follow request from %v to %v", followRequest.UserId, followRequest.QueryId)
+	_, err := contract.SubmitTransaction("FollowProfile", followRequest.UserId, followRequest.QueryId)
+	if err != nil {
+		log.Printf("Failed to submit transaction: %v", err)
+	}
+
+}
+
+func searchUser(w http.ResponseWriter, r *http.Request) {
+	log.Println("--> endpoint hit: searchUser")
+	body, _ := ioutil.ReadAll(r.Body)
+
+	var searchRequest UserQuery
+	json.Unmarshal(body, &searchRequest)
+	log.Printf("sending search request for user %v", searchRequest.QueryId)
+	_, err := contract.EvaluateTransaction("UserExists", searchRequest.QueryId)
+	if err != nil {
+		log.Fatalf("failed to evaluate transaction: %v", err)
+	}
+	w.WriteHeader(http.StatusFound)
+	w.Header().Set("Content-Type", "application/json")
+	//create db function for fetching full posts from database
+	/*      _, result := db.ReadAllData()
+	        finalResult, _ := json.Marshal(result) */
+	valJson, _ := json.Marshal(map[string]bool{"found": true})
+	w.Write(valJson)
+}
+
+func acceptFollower(w http.ResponseWriter, r *http.Request) {
+	log.Println("--> endpoint hit: AcceptFollower")
+	body, _ := ioutil.ReadAll(r.Body)
+
+	var acceptRequest UserQuery
+	json.Unmarshal(body, &acceptRequest)
+	log.Printf("request accept follower %v to user %v", acceptRequest.QueryId, acceptRequest.UserId)
+	_, err := contract.SubmitTransaction("AcceptFollower", acceptRequest.UserId, acceptRequest.QueryId)
+	if err != nil {
+		log.Fatalf("failed to submit transaction: %v", err)
+	}
+}
+
+//func seeSharing() {}
 
 func getAllPosts(w http.ResponseWriter, r *http.Request) {
 	log.Println("--> Endpoint Hit: getAllPosts")
 	log.Println("--> Evaluate Transaction: GetAllPosts")
-	//finn alle posts du kan se for en bruker
-	//		network, err := configNet()
-	//		contract := network.GetContract("basic")
-	postsJson, err := contract.EvaluateTransaction("GetAllPosts", "lars")
+	v := r.URL.Query()
+	username := v.Get("username")
+	postsJson, err := contract.EvaluateTransaction("GetAllPosts", username)
 	if err != nil {
-		log.Fatalf("Failed to evaluate transaction: %v", err)
+		log.Printf("Failed to evaluate transaction: %v", err)
 	}
 	var posts []Post
 	json.Unmarshal(postsJson, &posts)
@@ -94,15 +147,15 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	//post.Poster = post.Owner
 	//TODO: marshaling arrays
 	//emptySharingHistory := make([]string, 0)
-	log.Printf("received data: %v", post.Data)
-	_, err := contract.SubmitTransaction("CreatePost", post.PostId, post.Owner, "") //, post.Poster, post.PostDate)
+
+	log.Printf("received data: %v from user %v", post.Data, post.Owner)
+	_, err := contract.SubmitTransaction("CreatePost", post.PostId, post.Owner) //, post.Poster, post.PostDate)
 	if err != nil {
-		log.Fatalf("Failed to submit transaction: %v", err)
+		log.Printf("Failed to submit transaction: %v", err)
 	}
 	err = db.InsertData(post.PostId, post.Data)
 	if err != nil {
 		log.Printf("%v\n", err)
-		return
 	}
 }
 
@@ -161,73 +214,58 @@ func main() {
 	}
 
 	handleRequests()
-	//fmt.Println("network type : ",  reflect.TypeOf(contract))
-
-	//log.Println("--> Submit Transaction: InitLedger")
-	//result, err := contract.SubmitTransaction("InitLedger")
-	//if err != nil {
-	//	log.Fatalf("Failed to Submit transaction: %v", err)
-	//}
-	//log.Println(string(result))
-
-	//log.Println("--> Evaluate Transaction: GetAllAssets")
-	//result, err = contract.EvaluateTransaction("GetAllAssets")
-	//if err != nil {
-	//	log.Fatalf("Failed to evaluate transaction: %v", err)
-	//}
-	//log.Println(string(result))
-	//reader := bufio.NewReader(os.Stdin)
-
-	// start the main idea: take the hash of data, store the hash on chain and data along with its hash in database.
-
-	//	for i := 0; i < 5; i++ {
-	//		log.Println("Please enter:  owner name, data to store")
-	//		userInput, err := reader.ReadString('\n')
-	//		if err != nil {
-	//			return
-	//		}
-	// remove the delimeter from the string
-	//		userInput = strings.TrimSuffix(userInput, "\n")
-	// store the data along with its hash in the database
-	//		owner, data := intData(userInput)
-	//		ID := hashTxn(data)
-	//		err = db.InsertData(ID, data)
-	//		if err!= nil {
-	//			log.Printf("%v\n", err)
-	//			return
-	//		}
-	//
-	//		log.Println("--> Submit Transaction to on chain!")
-	//		result, err = contract.SubmitTransaction("CreateAsset", ID, owner)
-	//		if err != nil {
-	//			log.Fatalf("Failed to Submit transaction: %v", err)
-	//		}
-	//		log.Println("Asset is created: ", string(result))
-
-	//		log.Println("--> Evaluate Transaction on chain!")
-	//		result, err = contract.EvaluateTransaction("ReadAsset", ID)
-	//		if err != nil {
-	//			log.Fatalf("Failed to evaluate transaction: %v", err)
-	//		}
-	//		log.Printf("Transaction %s, is verfied!\n", string(result))
-	//	}
-
-	//	err = db.ReadAllData()
-	//	if err!= nil {
-	//		log.Printf("%v", err)
-	//		return
-	//	}
-
-	//	log.Println("Verifying data stored in Database and linked to chain;\nPlease provid Transaction ID:")
-	//	txid, err := reader.ReadString('\n')
-	//	if err != nil {
-	//		return
-	//	}
-	//	txid = strings.TrimSuffix(txid, "\n")
-	//	verifyTxn(txid, contract, db)
-
-	//	log.Println("============ Done ============")
 }
+
+//fmt.Println("network type : ",  reflect.TypeOf(contract))
+
+//log.Println("--> Submit Transaction: InitLedger")
+//result, err := contract.SubmitTransaction("InitLedger")
+//if err != nil {
+//	log.Fatalf("Failed to Submit transaction: %v", err)
+//}
+//log.Println(string(result))
+
+//log.Println("--> Evaluate Transaction: GetAllAssets")
+//result, err = contract.EvaluateTransaction("GetAllAssets")
+//if err != nil {
+//	log.Fatalf("Failed to evaluate transaction: %v", err)
+//}
+//log.Println(string(result))
+//reader := bufio.NewReader(os.Stdin)
+
+// start the main idea: take the hash of data, store the hash on chain and data along with its hash in database.
+
+//	for i := 0; i < 5; i++ {
+//		log.Println("Please enter:  owner name, data to store")
+//		userInput, err := reader.ReadString('\n')
+//		if err != nil {
+//			return
+//		}
+// remove the delimeter from the string
+//		userInput = strings.TrimSuffix(userInput, "\n")
+// store the data along with its hash in the database
+//		owner, data := intData(userInput)
+//		ID := hashTxn(data)
+//		err = db.InsertData(ID, data)
+//		if err!= nil {
+//			log.Printf("%v\n", err)
+//			return
+//		}
+//
+//		log.Println("--> Submit Transaction to on chain!")
+//		result, err = contract.SubmitTransaction("CreateAsset", ID, owner)
+//		if err != nil {
+//			log.Fatalf("Failed to Submit transaction: %v", err)
+//		}
+//		log.Println("Asset is created: ", string(result))
+
+//		log.Println("--> Evaluate Transaction on chain!")
+//		result, err = contract.EvaluateTransaction("ReadAsset", ID)
+//		if err != nil {
+//			log.Fatalf("Failed to evaluate transaction: %v", err)
+//		}
+//		log.Fatalf("Error setting DISCOVERY_AS_LOCALHOST environemnt variable: %v", err)
+//	}
 
 func initDb(initData []Post) error {
 	for _, val := range initData {

@@ -45,14 +45,15 @@ func TestCreatePost(t *testing.T) {
 	smartContract := chaincode.SmartContract{}
 
 	chaincodeStub.GetStateReturns(userProfileJson, nil)
-	err := smartContract.CreatePost(transactionContext, "post2", "knutis", make([]string, 0))
+	err := smartContract.CreatePost(transactionContext, "post2", "knutis")
 	require.NoError(t, err)
 
-	err = smartContract.CreatePost(transactionContext, "post1", "knutis", make([]string, 0))
+	err = smartContract.CreatePost(transactionContext, "post1", "knutis")
 	require.EqualError(t, err, "the asset post1 already exists")
 
-	err = smartContract.CreatePost(transactionContext, "post2", "knutis", nil)
-	require.NoError(t, err)
+	chaincodeStub.GetStateReturns(nil, nil)
+	err = smartContract.CreatePost(transactionContext, "post2", "knutis")
+	require.EqualError(t, err, "user knutis does not exist")
 }
 
 /* func TestSharePost(t *testing.T) {
