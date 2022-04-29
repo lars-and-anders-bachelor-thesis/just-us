@@ -15,10 +15,9 @@ type SmartContract struct {
 }
 
 type Asset struct {
-	ForwardingHistory []string `json: "forwardingHistory"`
-	Owner             string   `json:"owner"`
-	PostId            string   `json:"postId"`
-	SharingHistory    []string `json: "sharingHistory"`
+	Owner          string   `json:"owner"`
+	PostId         string   `json:"postId"`
+	SharingHistory []string `json: "sharingHistory"`
 	//PostDate string `json:"postDate"`
 	//Poster   string `json:"poster"`
 	//	Status		int	`json:"status"`
@@ -30,8 +29,8 @@ type Asset struct {
 //}
 
 type Profile struct {
-	Followers        []string `json:"followers"`
 	FollowedUsers    []string `json: followedUsers`
+	Followers        []string `json:"followers"`
 	PendingFollowers []string `json:"pendingFollowers"`
 	Posts            []Asset  `json:"posts"`
 	Username         string   `json: "username"`
@@ -52,34 +51,31 @@ type Profile struct {
 //	membership memberType
 //}
 //
-//add init function? populate with example posts?
 
 // init function neccessary for adding chaincode to peers. TODO: why neccessary, remove?
 func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) error {
 	postList := make([]Asset, 0)
 	postList = append(postList, Asset{
-		ForwardingHistory: make([]string, 0),
-		SharingHistory:    make([]string, 0),
-		PostId:            "1",
-		Owner:             "anders"})
+		SharingHistory: make([]string, 0),
+		PostId:         "1",
+		Owner:          "anders"})
 	postList = append(postList, Asset{
-		ForwardingHistory: make([]string, 0),
-		SharingHistory:    make([]string, 0),
-		PostId:            "2",
-		Owner:             "anders",
+		SharingHistory: make([]string, 0),
+		PostId:         "2",
+		Owner:          "anders",
 	})
 	userProfile := Profile{
 		Followers:        []string{"lars"},
-		FollowedUsers:    []string{"anders"},
+		FollowedUsers:    []string{"lars"},
 		PendingFollowers: make([]string, 0),
 		Posts:            postList,
 		Username:         "anders",
 	}
 	userProfile2 := Profile{
 		Followers:        []string{"anders"},
-		FollowedUsers:    []string{"lars"},
+		FollowedUsers:    []string{"anders"},
 		PendingFollowers: make([]string, 0),
-		Posts:            postList,
+		Posts:            make([]Asset, 0),
 		Username:         "lars",
 	}
 	profileList := []Profile{userProfile, userProfile2}
@@ -98,6 +94,10 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 	return nil
 }
 
+func (s *SmartContract) GenerateSharingTree(ctx contractapi.TransactionContextInterface, userId string, postId string) {
+
+}
+
 // CreatePost issues a new asset to the world state with given details.
 func (s *SmartContract) CreatePost(ctx contractapi.TransactionContextInterface, postId string, userId string) error {
 	//id, err := ctx.GetClientIdentity().GetID()
@@ -110,13 +110,11 @@ func (s *SmartContract) CreatePost(ctx contractapi.TransactionContextInterface, 
 	}
 
 	sharingHistory := make([]string, 0)
-	forwardingHistory := make([]string, 0)
 
 	asset := Asset{
-		ForwardingHistory: forwardingHistory,
-		Owner:             userId,
-		PostId:            postId,
-		SharingHistory:    sharingHistory,
+		Owner:          userId,
+		PostId:         postId,
+		SharingHistory: sharingHistory,
 	}
 	profile, err := s.ReadProfile(ctx, userId)
 	if err != nil {
@@ -127,6 +125,7 @@ func (s *SmartContract) CreatePost(ctx contractapi.TransactionContextInterface, 
 	return ctx.GetStub().PutState(userId, profileJson)
 }
 
+//SharePost shares a post from another user to your own profile. Creator of post remains the original poster.
 func (s *SmartContract) SharePost(ctx contractapi.TransactionContextInterface, owner string, postId string, userId string) error {
 	//id, err := ctx.GetClientIdentity().GetID()
 	exists, err := s.PostExists(ctx, userId, postId)
@@ -145,13 +144,12 @@ func (s *SmartContract) SharePost(ctx contractapi.TransactionContextInterface, o
 			index = i
 		}
 	}
-	post.SharingHistory = append(post.ForwardingHistory, userId)
+	post.SharingHistory = append(post.SharingHistory, userId)
 
 	// TODO: create sharing restriction after a certain number of sharing ops
-	//sharingHistory := make([]string, 0)
 	s.CreatePost(ctx, postId, userId)
 	profile.Posts[index] = post
-	profileJson, err := json.Marshal(profile)
+	profileJson, _ := json.Marshal(profile)
 	return ctx.GetStub().PutState(userId, profileJson)
 }
 
@@ -184,6 +182,7 @@ func (s *SmartContract) ReadPost(ctx contractapi.TransactionContextInterface, us
 	return nil, fmt.Errorf("post not found")
 }
 
+// ReadProfile returns a profile complete with posts and other
 func (s *SmartContract) ReadProfile(ctx contractapi.TransactionContextInterface, id string) (*Profile, error) {
 	profileJson, err := ctx.GetStub().GetState(id)
 	if err != nil {
@@ -238,6 +237,7 @@ func (s *SmartContract) FollowProfile(ctx contractapi.TransactionContextInterfac
 	return ctx.GetStub().PutState(followId, profileJson)
 }
 
+//AcceptFollower moves a user id from the list of pending followers to the list of followers
 func (s *SmartContract) AcceptFollower(ctx contractapi.TransactionContextInterface, userId string, followerId string) error {
 	profile, err := s.ReadProfile(ctx, userId)
 	if err != nil {

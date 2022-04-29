@@ -30,10 +30,14 @@ type Post struct {
 	Data   string `json:"data"`
 	Owner  string `json:"owner"`
 	PostId string `json:"postId"`
-	//Depth           int     `json:"depth"`
-	//PostDate string `json:"postDate"`
-	//Poster   string `json:"poster"`
-	//Status          int     `json:"status"`
+}
+
+type Profile struct {
+	FollowedUsers    []string `json: followedUsers`
+	Followers        []string `json:"followers"`
+	PendingFollowers []string `json:"pendingFollowers"`
+	Posts            []Post   `json:"posts"`
+	Username         string   `json: "username"`
 }
 
 type Login struct {
@@ -49,12 +53,41 @@ type UserQuery struct {
 func handleRequests() {
 	r := mux.NewRouter().StrictSlash(true)
 	//	r.HandleFunc("/Posts", getAllPosts)
+	r.HandleFunc("/Profile", getProfile).Queries("username", "{username}").Methods("GET")
 	r.HandleFunc("/Post", createPost).Methods("POST")
 	r.HandleFunc("/User", signUp).Methods("POST")
 	r.HandleFunc("/Posts", getAllPosts).Queries("username", "{username}").Methods("GET")
-	r.HandleFunc("/Users/search", searchUser).Methods("POST")
+	r.HandleFunc("/Users/Search", searchUser).Methods("POST")
+	r.HandleFunc("/User/follow", followUser).Methods("POST")
+	r.HandleFunc("/User/AcceptFollow", acceptFollower).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
+
+func getProfile(w http.ResponseWriter, r *http.Request) {
+	log.Println("--> Endpoint hit: getProfile")
+	v := r.URL.Query()
+	username := v.Get("username")
+
+	log.Printf("requesting profile for user %v", username)
+	profileJson, err := contract.EvaluateTransaction("ReadProfile", username)
+	var profile Profile
+	if err != nil {
+		log.Printf("failed to evaluate chaincode: %v", err)
+		w.WriteHeader(http.StatusNotFound)
+	}
+	err = json.Unmarshal(profileJson, &profile)
+	if err != nil {
+		log.Printf("error marshaling/unmarshaling profile: %v", err)
+	}
+	profileJson, err = json.Marshal(profile)
+	if err != nil {
+		log.Printf("error marshaling/unmarshaling profile: %v", err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(profileJson)
+}
+
+//func getSharingTree(w http.ResponseWriter, r *http.Request) {}
 
 func followUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("--> Endpoint Hit: followUser")
@@ -77,16 +110,19 @@ func searchUser(w http.ResponseWriter, r *http.Request) {
 	var searchRequest UserQuery
 	json.Unmarshal(body, &searchRequest)
 	log.Printf("sending search request for user %v", searchRequest.QueryId)
-	_, err := contract.EvaluateTransaction("UserExists", searchRequest.QueryId)
+	existsJson, err := contract.EvaluateTransaction("ProfileExists", searchRequest.QueryId)
 	if err != nil {
-		log.Fatalf("failed to evaluate transaction: %v", err)
+		log.Printf("failed to evaluate transaction: %v", err)
 	}
-	w.WriteHeader(http.StatusFound)
+	var exists bool
+	json.Unmarshal(existsJson, &exists)
+	if !exists {
+		w.WriteHeader(http.StatusNoContent)
+	} else {
+		w.WriteHeader(http.StatusFound)
+	}
 	w.Header().Set("Content-Type", "application/json")
-	//create db function for fetching full posts from database
-	/*      _, result := db.ReadAllData()
-	        finalResult, _ := json.Marshal(result) */
-	valJson, _ := json.Marshal(map[string]bool{"found": true})
+	valJson, _ := json.Marshal(map[string]bool{"found": exists})
 	w.Write(valJson)
 }
 
@@ -117,6 +153,7 @@ func getAllPosts(w http.ResponseWriter, r *http.Request) {
 	var posts []Post
 	json.Unmarshal(postsJson, &posts)
 	var postData string
+	log.Printf("read from ledger: %v", posts)
 	for i, val := range posts {
 		postData, err = db.ReadData(val.PostId)
 		if err != nil {
