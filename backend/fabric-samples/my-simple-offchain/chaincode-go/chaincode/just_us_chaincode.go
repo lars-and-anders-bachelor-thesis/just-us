@@ -232,6 +232,11 @@ func (s *SmartContract) FollowProfile(ctx contractapi.TransactionContextInterfac
 			return fmt.Errorf("Request already pending")
 		}
 	}
+	for _, val := range followProfile.Followers {
+		if val == followId {
+			return fmt.Errorf("user %v already following user %v", userId, followId)
+		}
+	}
 	followProfile.PendingFollowers = append(followProfile.PendingFollowers, userId)
 	profileJson, _ := json.Marshal(followProfile)
 	return ctx.GetStub().PutState(followId, profileJson)
