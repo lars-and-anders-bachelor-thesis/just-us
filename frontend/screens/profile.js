@@ -1,15 +1,85 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import { AuthContext } from '../context/context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'react-native-axios';
+import Icon from 'react-native-vector-icons/FontAwesome';
+
 import {
   StyleSheet,
   Text,
   View,
   Image,
   Button,
-  TouchableOpacity
+  TouchableOpacity,
+  FlatList
 } from 'react-native';
 
+
 export default function Profile() {
+  
+  const [clicked, setClicked] = useState(false);
+  const [data, setData] = useState([]);
+  
+  function Item({ item }){
+    return (
+        <View style={styles.card}>
+          <View style={styles.namebox}>
+            <Text>{item}</Text>
+            <View style={styles.icons}>
+              <Icon name="ban" color="red" size={20} />
+              <TouchableOpacity onPress={() => AcceptFollower(item)}>
+                <Icon name="check" color="green" size={20}/>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+    )
+  };
+
+function showPending() {
+  if (clicked) {
+    setClicked(false)
+  }else{
+    setClicked(true)
+  }
+}
+
+const fetchData = async () => {
+  let resp;  
+  const user = await AsyncStorage.getItem('storageUsername')
+  const resp0nse = await axios.get('http://152.94.171.1:8080/Profile?username='+user) // /User
+  .then(function (response) {
+      // handle success
+      resp = response.data;
+      console.log(resp)
+  })
+  .catch(function (error) {
+      // handle error
+      console.log(error);
+  })
+  .then(function () {
+      // always executed
+  });
+  setData(resp["pendingFollowers"]);
+};   
+
+useEffect(() => {
+  fetchData();
+}, []);
+
+async function AcceptFollower(item){
+  const user = await AsyncStorage.getItem('storageUsername')
+  try{
+    fetch('http://152.94.171.1:8080/User/AcceptFollow', {
+        method: 'POST',
+        body: JSON.stringify({userId: user, queryId: item})
+    });
+    fetchData();
+    alert("You("+user+"), have now accepted the follower request of "+item+"\n Data is now: "+data);
+  }catch{
+    console.log("ay dette funka visst ikke kompis")
+  }
+}
 
 const { signOut } = React.useContext(AuthContext);
     return (
@@ -18,13 +88,16 @@ const { signOut } = React.useContext(AuthContext);
           <Image style={styles.avatar} source={{uri: 'https://bootdey.com/img/Content/avatar/avatar6.png'}}/>
           <View style={styles.body}>
             <View style={styles.bodyContent}>
-              <Text style={styles.name}>John Doe</Text>
-              <Text style={styles.info}>UX Designer / Mobile developer</Text>
-              <Text style={styles.description}>Lorem ipsum dolor sit amet, saepe sapientem eu nam. Qui ne assum electram expetendis, omittam deseruisse consequuntur ius an,</Text>
-              
-              <TouchableOpacity style={styles.buttonContainer}>
-                <Text>Opcion 1</Text>  
-              </TouchableOpacity>              
+              <TouchableOpacity style={styles.buttonContainer} onPress={() => showPending()}>
+                <Text>Show pending followers</Text>  
+              </TouchableOpacity>           
+              {clicked &&
+              <FlatList
+                data={data} 
+                renderItem={Item}
+                keyExtractor={(item) => item.id} //.ToString()
+              />
+              }
               <TouchableOpacity style={styles.buttonContainer} onPress={() => signOut()}>
                 <Text>Log out</Text> 
               </TouchableOpacity>
@@ -59,7 +132,7 @@ const styles = StyleSheet.create({
     marginTop:40,
   },
   bodyContent: {
-    flex: 1,
+    // flex: 1,
     alignItems: 'center',
     padding:30,
   },
@@ -93,38 +166,28 @@ const styles = StyleSheet.create({
   logout_btn: {
       position: 'absolute',
       bottom: 0,
-  }
+  }, 
+  namebox: {
+    width: 250,
+    height: 50,
+    borderRadius:30,
+    borderWidth: 1,
+    paddingTop: 13,
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    paddingLeft: 20,
+    alignContent: 'space-between',
+  },
+  icons: {
+    flexDirection: 'row-reverse',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    marginLeft: 10,
+    width: 80,
+    alignItems: 'stretch'
+  },
+  // card: {
+  //   borderWidth: 2,
+  // }
 });
-
-                                            
-
-
-
-// import React from 'react';
-// import { 
-//     StyleSheet,
-//     Text,
-//     View,
-//     Image,
-//     TextInput,
-//     Button,
-//     TouchableOpacity,
-// } from 'react-native';
-
-// export default function Profile() {
-//     return (
-//         <View style={styles.container}>
-//             <Text>This is the best profile ever!</Text>
-
-//         </View>
-//     )
-// }
-
-// const styles = StyleSheet.create({
-//     container: {
-//         flex: 1,
-//         backgroundColor: "#fff",
-//         alignItems: "center",
-//         justifyContent: "center",
-//     },
-// })

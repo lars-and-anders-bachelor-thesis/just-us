@@ -29,11 +29,11 @@ export default function UserLogin() {
              onChangeText={(text)=> setUsername({username: text})}
              underlineColorAndroid={'transparent'} ></TextInput>
 
-            <TextInput style={styles.textinput} placeholder="Your password"
+            {/* <TextInput style={styles.textinput} placeholder="Your password"
              password={true}
              secureTextEntry={true}
              onChangeText={(text)=> setPassword({password: text})}
-             underlineColorAndroid={'transparent'} ></TextInput>
+             underlineColorAndroid={'transparent'} ></TextInput> */}
 
             <TouchableOpacity style={styles.button} onPress={ () => Submit()}>
                 <Text style={styles.btntxt}>Log in</Text>

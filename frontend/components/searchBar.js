@@ -3,7 +3,7 @@ import React from "react";
 import { StyleSheet, TextInput, View, Keyboard, Button } from "react-native";
 import { Feather, Entypo } from "@expo/vector-icons";
 
-const SearchBar = ({clicked, searchPhrase, setSearchPhrase, setClicked}) => {
+const SearchBar = ({clicked, searchPhrase, setSearchPhrase, setClicked, setFound}) => {
   return (
     <View style={styles.container}>
       <View
@@ -33,13 +33,14 @@ const SearchBar = ({clicked, searchPhrase, setSearchPhrase, setClicked}) => {
         {/* cross Icon, depending on whether the search bar is clicked or not */}
         {clicked && (
           <Entypo name="cross" size={20} color="black" style={{ padding: 1 }} onPress={() => {
-              setSearchPhrase("")   
+              setSearchPhrase("")
+              setFound(false)   
           }}/>
         )}
       </View>
       {/* cancel button, depending on whether the search bar is clicked or not */}
       {clicked && (
-        <View>
+        <View style={styles.cancelBtn}>
           <Button
             title="Cancel"
             onPress={() => {
@@ -66,6 +67,7 @@ const styles = StyleSheet.create({
   },
   searchBar__unclicked: {
     padding: 10,
+    // right:20,
     flexDirection: "row",
     width: "95%",
     backgroundColor: "#d9dbda",
@@ -80,10 +82,15 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     alignItems: "center",
     justifyContent: "space-evenly",
+    marginTop: 60,
   },
   input: {
     fontSize: 20,
     marginLeft: 10,
     width: "90%",
+    // marginTop: 100,
   },
+  cancelBtn: {
+    marginTop: 60,
+  }
 });

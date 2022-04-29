@@ -12,7 +12,6 @@ import {
     TouchableOpacity,
     FlatList,
  } from 'react-native';
-import { registerRootComponent } from 'expo';
 
  const DATA = [
      {
@@ -46,48 +45,49 @@ import { registerRootComponent } from 'expo';
  ]
 
 
+ export default function Feed({ navigation }) {
 
- function Item({ item }){
-    return (
-        <View style={styles.card}>
-            <View style={styles.card_Header}>
-                <View style={styles.header_Left}>
-                    <Image 
-                    style={styles.userImage}
-                    source={{
-                        uri: DATA[3].feed_image,
-                    }}/>
-                    <Text style={styles.userName}>{item.owner}</Text>
+    function Item({ item }){
+        return (
+            <View style={styles.card}>
+                <View style={styles.card_Header}>
+                    <View style={styles.header_Left}>
+                        <Image 
+                        style={styles.userImage}
+                        source={{
+                            uri: DATA[3].feed_image,
+                        }}/>
+                        <Text style={styles.userName}>{item.owner}</Text>
+                    </View>
+                    <View style={styles.header_Right}>
+                        <Icon name="ellipsis-h" style={styles.kake}/>
+                    </View>
                 </View>
-                <View style={styles.header_Right}>
-                    <Icon name="ellipsis-h" style={styles.kake}/>
-                </View>
-            </View>
-            {/* <Image 
-                    style={styles.feedImage}
-                    source={{
-                        uri: DATA[3].feed_image,
-            }}/> */}
-            <Text>{item.data}</Text>
-            <View style={styles.card_Footer}>
-                <View style={styles.footer_Left}>
+                {/* <Image 
+                        style={styles.feedImage}
+                        source={{
+                            uri: DATA[3].feed_image,
+                }}/> */}
+                <Text>{item.data}</Text>
+                <View style={styles.card_Footer}>
                     <View style={styles.footer_Left}>
-                        <Icon name="heart" color="red" size={20}/>
+                        <View style={styles.footer_Left}>
+                            <Icon name="heart" color="red" size={20}/>
+                            <Text style={{ marginLeft: 5, fontSize: 16}}>{DATA[3].like_count}</Text>
+                        </View>
+                    <View style={{flexDirection: "row", marginLeft: 15}}></View>
+                        <Icon name="comment" color="gray" size={20}/>
                         <Text style={{ marginLeft: 5, fontSize: 16}}>{DATA[3].comment_count}</Text>
                     </View>
-                <View style={{flexDirection: "row", marginLeft: 15}}></View>
-                    <Icon name="comment" color="gray" size={20}/>
-                    <Text style={{ marginLeft: 5, fontSize: 16}}>{DATA[3].like_count}</Text>
+                    <TouchableOpacity style={styles.shareBtn} onPress={() => SharePost(item.postId, item.owner)}>
+                        <Text style={styles.loginText}>Share this post</Text>
+                    </TouchableOpacity>
+                    <Icon name="bookmark" color="gray" size={20}/>
                 </View>
-                <Icon name="bookmark" color="gray" size={20}/>
+    
             </View>
-
-        </View>
-    )
- };
-
-
- export default function Feed({ navigation }) {
+        )
+     };
 
     const FakeItem = ({ item }) => {
         return (
@@ -121,7 +121,31 @@ import { registerRootComponent } from 'expo';
 
      useEffect(() => {
         fetchData();
-      }, []);
+    }, []);
+
+    async function SharePost(postid, owner){
+    const user = await AsyncStorage.getItem('storageUsername')
+    try{
+        fetch('http://152.94.171.1:8080/Post/Share', {
+            method: 'POST',
+            body: JSON.stringify({userId: user, queryId: owner, postId: postid})
+        }).then(response => response.json())
+        // handle success
+        .then(json => resp=json)
+            .catch(function (error) {
+                // handle error
+                console.log(error);
+        })
+            .then(function () {
+            // always executed
+        });
+        alert(user+" have now shared "+owner+"'s post with postId"+postid);
+        console.log(resp)
+        fetchData();
+    }catch{
+        console.log("ay dette funka visst ikke kompiso")
+    }
+    }
 
     return (
         <View style={styles.container}>
@@ -200,5 +224,13 @@ const styles = StyleSheet.create({
     },
     footer_Left: {
         flexDirection: 'row',
+    },
+    shareBtn: {
+        width: "40%",
+        borderRadius: 10,
+        height: 30,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#157EFB",
     },
 })  

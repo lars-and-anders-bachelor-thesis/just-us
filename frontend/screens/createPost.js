@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import { AuthContext } from '../context/context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
     StyleSheet,
     Text,
@@ -15,14 +16,14 @@ export default function CreatePost() {
     const [owner, setOwner] = useState('');
     const [data, setData] = useState('');
 
-    function Submit()
+    async function Submit()
     {   
-        alert("The owner is "+owner["owner"]+" and the content is "+data["data"])
-
+        const user = await AsyncStorage.getItem('storageUsername')
+        alert("The owner is "+user+" and the content is "+data["data"])
         try{
             fetch('http://152.94.171.1:8080/Post', {
                 method: 'POST',
-                body: JSON.stringify({data: data["data"], owner: owner["owner"]})
+                body: JSON.stringify({data: data["data"], owner: user})
             });
         }catch{
             console.log("ay dette funka visst ikke kompis")
@@ -32,11 +33,11 @@ export default function CreatePost() {
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Create post</Text>
-
+{/* 
             <TextInput style={styles.textinput} placeholder="Owner of the post" 
              underlineColorAndroid={'transparent'}
              onChangeText={(text)=> setOwner({owner: text})}
-             ></TextInput>
+             ></TextInput> */}
 
             <TextInput style={styles.textinput} placeholder="Content of the post"
              onChangeText={(text)=> setData({data: text})}
@@ -55,6 +56,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         alignItems: "center",
         justifyContent: "center",
+        padding: 50,
       },
       header: {
           fontSize: 24, 
@@ -68,7 +70,7 @@ const styles = StyleSheet.create({
           alignSelf: 'stretch',
           height: 40,
           marginBottom: 30, 
-          color: '#fff',
+          color: 'black',
           borderBottomColor: '#f8f8f8',
           borderBottomWidth: 1,
       },

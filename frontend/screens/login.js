@@ -25,10 +25,10 @@ export default function Login({ navigation }) {
             <TouchableOpacity style={styles.loginBtn} onPress={() => navigation.navigate("LoginUser")}>
                 <Text style={styles.loginText} >LOGIN</Text>
             </TouchableOpacity>
-
+{/* 
             <TouchableOpacity>
                 <Text style={styles.forgot_button}>Forgot Password?</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <TouchableOpacity style={styles.loginBtn} onPress={() => navigation.navigate("CreateUser")}>
                 <Text style={styles.loginText}>CREATE NEW USER</Text>
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
       height: 50,
       alignItems: "center",
       justifyContent: "center",
-      marginTop: 40,
+      marginTop: 60,
       backgroundColor: "#157EFB",
     },
     h1: {

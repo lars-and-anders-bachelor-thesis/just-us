@@ -22,13 +22,21 @@ const fakeUsernames = [
     },
     {
         id: '2',
-        first: 'Peter',
-        second: 'Lars',
-        third: 'Amish'
+        first: 'Lars',
+        second: 'Peter',
+        fourth: 'Erlend',
+        third: 'Amish',
+        fifth: 'Knut'
     },
     {
         id: '3',
         first: 'Peter',
+    },
+    {
+        id: '4',
+        first: 'Chris',
+        second: 'Amish',
+        third: 'Peter',
     },
 ];
 

@@ -1,7 +1,5 @@
 // List.js
 import React from "react";
-import VisitUserNest from "../customNavigation/visitUserNest";
-import { useNavigation } from '@react-navigation/native';
 import {
   StyleSheet,
   Text,
@@ -61,7 +59,7 @@ export default List;
 
 const styles = StyleSheet.create({
   list__container: {
-    margin: 10,
+    margin: -50,
     height: "85%",
     width: "100%",
   },
