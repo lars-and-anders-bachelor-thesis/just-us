@@ -27,9 +27,10 @@ var network *gateway.Network
 var contract *gateway.Contract
 
 type Post struct {
-	Data   string `json:"data"`
-	Owner  string `json:"owner"`
-	PostId string `json:"postId"`
+	Data           string   `json:"data"`
+	Owner          string   `json:"owner"`
+	PostId         string   `json:"postId"`
+	SharingHistory []string `json:"sharingHistory"`
 }
 
 type Profile struct {
@@ -48,6 +49,7 @@ type Login struct {
 type UserQuery struct {
 	UserId  string `json:"userId"`
 	QueryId string `json: "queryId"`
+	PostId  string `json: postId`
 }
 
 func handleRequests() {
@@ -58,9 +60,25 @@ func handleRequests() {
 	r.HandleFunc("/User", signUp).Methods("POST")
 	r.HandleFunc("/Posts", getAllPosts).Queries("username", "{username}").Methods("GET")
 	r.HandleFunc("/Users/Search", searchUser).Methods("POST")
-	r.HandleFunc("/User/follow", followUser).Methods("POST")
+	r.HandleFunc("/User/Follow", followUser).Methods("POST")
 	r.HandleFunc("/User/AcceptFollow", acceptFollower).Methods("POST")
+	r.HandleFunc("/History/{username}/{postId}", getHistory).Methods("GET")
+	r.HandleFunc("/Post/Share", sharePost).Methods("POST")
 	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
+func sharePost(w http.ResponseWriter, r *http.Request) {
+	log.Println("--> endpoint hit: sharepost")
+	body, _ := ioutil.ReadAll(r.Body)
+
+	var shareRequest UserQuery
+	json.Unmarshal(body, &shareRequest)
+	log.Printf("trying to share post from %v to %v", shareRequest.QueryId, shareRequest.UserId)
+	_, err := contract.SubmitTransaction("SharePost", shareRequest.QueryId, shareRequest.PostId, shareRequest.UserId)
+	if err != nil {
+		log.Printf("Failed to submit transaction: %v", err)
+	}
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func getProfile(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +105,38 @@ func getProfile(w http.ResponseWriter, r *http.Request) {
 	w.Write(profileJson)
 }
 
-//func getSharingTree(w http.ResponseWriter, r *http.Request) {}
+func getHistory(w http.ResponseWriter, r *http.Request) {
+	log.Printf("--> endpoint hit: getHistory")
+	//v := r.URL.Query()
+	v := mux.Vars(r)
+	username := v["username"]
+	postId := v["postId"]
+	log.Printf("parameters: %v and %v", username, postId)
+
+	historyJson, err := contract.EvaluateTransaction("GenerateSharingTree", username, postId)
+	if err != nil {
+		fmt.Printf("Error evaluating transaction: %v", err)
+	}
+	var completeHistory []Post
+	var uniqueHistory [][]string
+	json.Unmarshal(historyJson, &completeHistory)
+	uniqueHistory = append(uniqueHistory, completeHistory[0].SharingHistory)
+	if len(completeHistory) > 1 {
+		for i := range completeHistory {
+			if i+1 < len(completeHistory) {
+				if len(completeHistory[i].SharingHistory) != len(completeHistory[i+1].SharingHistory) {
+					uniqueHistory = append(uniqueHistory, completeHistory[i+1].SharingHistory)
+				}
+			}
+		}
+	}
+	uniqueHistoryJson, err := json.Marshal(uniqueHistory)
+	if err != nil {
+		log.Printf("error marshaling object: %v", err)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(uniqueHistoryJson)
+}
 
 func followUser(w http.ResponseWriter, r *http.Request) {
 	log.Println("--> Endpoint Hit: followUser")
@@ -135,7 +184,7 @@ func acceptFollower(w http.ResponseWriter, r *http.Request) {
 	log.Printf("request accept follower %v to user %v", acceptRequest.QueryId, acceptRequest.UserId)
 	_, err := contract.SubmitTransaction("AcceptFollower", acceptRequest.UserId, acceptRequest.QueryId)
 	if err != nil {
-		log.Fatalf("failed to submit transaction: %v", err)
+		log.Printf("failed to submit transaction: %v", err)
 	}
 }
 
@@ -153,17 +202,17 @@ func getAllPosts(w http.ResponseWriter, r *http.Request) {
 	var posts []Post
 	json.Unmarshal(postsJson, &posts)
 	var postData string
-	log.Printf("read from ledger: %v", posts)
 	for i, val := range posts {
 		postData, err = db.ReadData(val.PostId)
 		if err != nil {
-			log.Fatalf("failed to read from db: %v", err)
+			log.Printf("failed to read from db: %v", err)
 		}
+		log.Printf("post %v: %v", i, postData)
 		posts[i].Data = postData
 	}
 	postsJson, err = json.Marshal(posts)
 	if err != nil {
-		log.Fatalf("failed to marshal post: %v", err)
+		log.Printf("failed to marshal post: %v", err)
 	}
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
@@ -186,7 +235,7 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 	//emptySharingHistory := make([]string, 0)
 
 	log.Printf("received data: %v from user %v", post.Data, post.Owner)
-	_, err := contract.SubmitTransaction("CreatePost", post.PostId, post.Owner) //, post.Poster, post.PostDate)
+	_, err := contract.SubmitTransaction("CreatePost", post.PostId, post.Owner, post.Owner) //, post.Poster, post.PostDate)
 	if err != nil {
 		log.Printf("Failed to submit transaction: %v", err)
 	}
@@ -205,7 +254,7 @@ func signUp(w http.ResponseWriter, r *http.Request) {
 	log.Printf("--> Sign up user %v", loginInfo.Username)
 	_, err := contract.SubmitTransaction("CreateProfile", loginInfo.Username)
 	if err != nil {
-		log.Fatalf("failed to create profile: %v", err)
+		log.Printf("failed to create profile: %v", err)
 	}
 	log.Printf("--> success!")
 }
@@ -237,7 +286,7 @@ func main() {
 		initData := []Post{post1, post2}
 		log.Printf("creating list?")
 		if err != nil {
-			log.Fatalf("oinkers, anders failed! %v", err)
+			log.Printf("oinkers, anders failed! %v", err)
 		}
 		err = initDb(initData)
 		if err == nil {

@@ -45,14 +45,14 @@ func TestCreatePost(t *testing.T) {
 	smartContract := chaincode.SmartContract{}
 
 	chaincodeStub.GetStateReturns(userProfileJson, nil)
-	err := smartContract.CreatePost(transactionContext, "post2", "knutis")
+	err := smartContract.CreatePost(transactionContext, "post2", "knutis", "knutis")
 	require.NoError(t, err)
 
-	err = smartContract.CreatePost(transactionContext, "post1", "knutis")
+	err = smartContract.CreatePost(transactionContext, "post1", "knutis", "knutis")
 	require.EqualError(t, err, "the asset post1 already exists")
 
 	chaincodeStub.GetStateReturns(nil, nil)
-	err = smartContract.CreatePost(transactionContext, "post2", "knutis")
+	err = smartContract.CreatePost(transactionContext, "post2", "knutis", "knutis")
 	require.EqualError(t, err, "user knutis does not exist")
 }
 
@@ -91,8 +91,14 @@ func TestFollowProfile(t *testing.T) {
 	smartContract := chaincode.SmartContract{}
 
 	chaincodeStub.GetStateReturns(userProfileJson, nil)
-	err := smartContract.FollowProfile(transactionContext, "josh", "lars")
+	err := smartContract.FollowProfile(transactionContext, "anders", "jorban")
 	require.NoError(t, err)
+
+	err = smartContract.FollowProfile(transactionContext, "lars", "lars")
+	require.EqualError(t, err, "users cannot follow themselves")
+
+	err = smartContract.FollowProfile(transactionContext, "anders", "lars")
+	require.EqualError(t, err, "user anders already following user lars")
 }
 
 func TestAcceptFollower(t *testing.T) {
@@ -121,14 +127,13 @@ func TestReadAllPosts(t *testing.T) {
 
 func createProfile() []byte {
 	post := chaincode.Asset{
-		ForwardingHistory: make([]string, 0),
-		Owner:             "knutis",
-		PostId:            "post1",
-		SharingHistory:    make([]string, 0),
+		Owner:          "knutis",
+		PostId:         "post1",
+		SharingHistory: make([]string, 0),
 	}
 	userProfile := chaincode.Profile{
 		Followers:        make([]string, 0),
-		FollowedUsers:    []string{"anders"},
+		FollowedUsers:    []string{"lars"},
 		PendingFollowers: []string{"josh"},
 		Posts:            []chaincode.Asset{post},
 		Username:         "anders",
