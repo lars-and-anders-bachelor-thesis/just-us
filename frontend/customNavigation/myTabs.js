@@ -40,7 +40,7 @@ export default function MyTabs() {
           return <Entypo name="inbox" size={24} color="black" />
         } else if (route.name === 'Privacy') {
           // Denne er midlertidig fordi login ikke skal være inne i hovedinnholdet
-          return <Entypo name="bug" size={24} color="black" />
+          return <Entypo name="lock" size={24} color="black" />
         }
       },
       tabBarActiveTintColor: 'tomato',

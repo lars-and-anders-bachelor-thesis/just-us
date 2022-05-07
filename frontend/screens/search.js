@@ -51,7 +51,11 @@ export default function Search({navigation}) {
               .then(function () {
               // always executed
             });
-            setFound({found: true})
+            if (resp) {
+              setFound({found: true})
+            } else {
+              alert("Sorry didnt find any user with the name of: "+searchPhrase)
+            }
         }catch{
             console.log("ay dette funka visst ikke kompis")
         }
@@ -62,7 +66,7 @@ export default function Search({navigation}) {
       const user = await AsyncStorage.getItem('storageUsername');
       let resp;  
         try{
-            await fetch('http://152.94.171.1:8080/User/follow', {
+            await fetch('http://152.94.171.1:8080/User/Follow', {
                 method: 'POST',
                 body: JSON.stringify({userId: user, queryId: searchPhrase})
             }).then(response => response.json())
@@ -75,8 +79,7 @@ export default function Search({navigation}) {
               .then(function () {
               // always executed
             });
-            setFound({found: true})
-            alert("Nå var user: "+user+" og searchphrase var: "+searchPhrase)
+            alert("Nå sendte vi en follow-boi med user: "+user+" til brukeren: "+searchPhrase)
         }catch{
             console.log("ay dette funka visst ikke kompis")
         }

@@ -13,31 +13,24 @@ import {
 
 export default function CreatePost() {
 
-    const [owner, setOwner] = useState('');
     const [data, setData] = useState('');
 
     async function Submit()
     {   
         const user = await AsyncStorage.getItem('storageUsername')
-        alert("The owner is "+user+" and the content is "+data["data"])
         try{
             fetch('http://152.94.171.1:8080/Post', {
                 method: 'POST',
                 body: JSON.stringify({data: data["data"], owner: user})
             });
         }catch{
-            console.log("ay dette funka visst ikke kompis")
+            console.log("This did not go as planned")
         }
     };
 
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Create post</Text>
-{/* 
-            <TextInput style={styles.textinput} placeholder="Owner of the post" 
-             underlineColorAndroid={'transparent'}
-             onChangeText={(text)=> setOwner({owner: text})}
-             ></TextInput> */}
 
             <TextInput style={styles.textinput} placeholder="Content of the post"
              onChangeText={(text)=> setData({data: text})}

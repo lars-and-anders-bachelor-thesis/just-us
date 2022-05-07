@@ -19,6 +19,7 @@ export default function Profile() {
   
   const [clicked, setClicked] = useState(false);
   const [data, setData] = useState([]);
+  const [user, setUser] = useState("");
   
   function Item({ item }){
     return (
@@ -47,11 +48,12 @@ function showPending() {
 const fetchData = async () => {
   let resp;  
   const user = await AsyncStorage.getItem('storageUsername')
+  setUser(user)
   const resp0nse = await axios.get('http://152.94.171.1:8080/Profile?username='+user) // /User
   .then(function (response) {
       // handle success
       resp = response.data;
-      console.log(resp)
+      console.log("Dette er da data'n kompis: "+JSON.stringify(resp))
   })
   .catch(function (error) {
       // handle error
@@ -70,16 +72,22 @@ useEffect(() => {
 async function AcceptFollower(item){
   const user = await AsyncStorage.getItem('storageUsername')
   try{
-    fetch('http://152.94.171.1:8080/User/AcceptFollow', {
+    await fetch('http://152.94.171.1:8080/User/AcceptFollow', {
         method: 'POST',
         body: JSON.stringify({userId: user, queryId: item})
     });
-    fetchData();
-    alert("You("+user+"), have now accepted the follower request of "+item+"\n Data is now: "+data);
+    alert("You("+user+"), have now accepted the follower request of "+item);
   }catch{
     console.log("ay dette funka visst ikke kompis")
   }
+  await fetchData();
 }
+
+async function LogOut(){
+  setUser("")
+  signOut();
+}
+
 
 const { signOut } = React.useContext(AuthContext);
     return (
@@ -88,6 +96,7 @@ const { signOut } = React.useContext(AuthContext);
           <Image style={styles.avatar} source={{uri: 'https://bootdey.com/img/Content/avatar/avatar6.png'}}/>
           <View style={styles.body}>
             <View style={styles.bodyContent}>
+              <Text>{user}</Text>
               <TouchableOpacity style={styles.buttonContainer} onPress={() => showPending()}>
                 <Text>Show pending followers</Text>  
               </TouchableOpacity>           
@@ -98,7 +107,7 @@ const { signOut } = React.useContext(AuthContext);
                 keyExtractor={(item) => item.id} //.ToString()
               />
               }
-              <TouchableOpacity style={styles.buttonContainer} onPress={() => signOut()}>
+              <TouchableOpacity style={styles.buttonContainer} onPress={() => LogOut()}>
                 <Text>Log out</Text> 
               </TouchableOpacity>
             </View>
