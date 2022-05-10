@@ -47,7 +47,7 @@ export default function Privacy({ navigation }) {
     const [userSharedList, setUserSharedList] = useState([]);
     const [followerList, setFollowerList] = useState([]);
 
-    async function makePostIdList(posts){ 
+    async function makeShareList(posts){ 
         const postIdList = [];
         {posts.map((post)=>{
             postIdList.push(post["postId"])
@@ -57,7 +57,7 @@ export default function Privacy({ navigation }) {
         const user = await AsyncStorage.getItem('storageUsername')
         {postIdList.map((postId)=>{
             // getHistory(postId)
-            const resp0nse = axios.get('http://152.94.171.1:8080/History/'+user+'/'+postId) // /User
+            const resp0nse = axios.get('http://172.28.237.98:8080/History/'+user+'/'+postId) // /User
             .then(function (response) {
                 // handle success
                 resp2 = response.data;
@@ -83,11 +83,11 @@ export default function Privacy({ navigation }) {
         let followers = [];
         let resp;  
         const user = await AsyncStorage.getItem('storageUsername')
-        const resp0nse = await axios.get('http://152.94.171.1:8080/Profile?username='+user) // /User
+        const resp0nse = await axios.get('http://172.28.237.98:8080/Profile?username='+user) // /User
         .then(function (response) {
             // handle success
             resp = response.data;
-            // console.log("\nDette er da data'n kompis: "+JSON.stringify(resp["posts"]))
+            console.log("\nDette er da data'n kompis: "+JSON.stringify(resp["posts"]))
         })
         .catch(function (error) {
             // handle error
@@ -96,7 +96,7 @@ export default function Privacy({ navigation }) {
         .then(function () {
             // always executed
         });
-        makePostIdList(resp["posts"])
+        makeShareList(resp["posts"])
         followers.push(resp["followers"])
         setFollowerList(followers[0])
       };   
@@ -107,6 +107,10 @@ export default function Privacy({ navigation }) {
 
 
     return (
+            <View>
+                <Text style={styles.info}>
+                    Here is the the users who have shared your posts. The red sharers does not follow you.
+                </Text>
             <FlatList
             data={userSharedList}
             keyExtractor={item => item.postId}
@@ -122,9 +126,13 @@ export default function Privacy({ navigation }) {
                                     <View style={styles.arrowUser}>
                                         <Icon name="arrow-right" size={20} style={styles.arrow}/>
                                         {!followerList.includes(username) ? 
-                                        <View><Text style={styles.imposter}>{username}</Text></View>
+                                        <View>
+                                            <Text style={styles.imposter}>{username}</Text>
+                                        </View>
                                         :
-                                        <View><Text>{username}</Text></View>}
+                                        <View>
+                                            <Text>{username}</Text>
+                                        </View>}
                                     </View>
                                 )
                             })}
@@ -139,6 +147,7 @@ export default function Privacy({ navigation }) {
             )}
             >
             </FlatList>
+        </View>
     )
 }
 
@@ -185,5 +194,8 @@ const styles = StyleSheet.create({
     },
     imposter: {
         color: 'red',
+    },
+    info: {
+        padding: 30,
     },
 })

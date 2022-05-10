@@ -15,18 +15,17 @@ export default function CreateUser() {
     const {signIn} = React.useContext(AuthContext);
 
     const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
 
     async function Submit()
     {   
 
         try{
-            fetch('http://152.94.171.1:8080/User', {
+            fetch('http://172.28.237.98:8080/User', {
                 method: 'POST',
-                body: JSON.stringify({username: username["username"], password: password["password"]})
+                body: JSON.stringify({username: username["username"]})
             });
             await AsyncStorage.setItem('storageUsername', username["username"])
-            alert("Username: "+username["username"]+"\nPassword: "+password["password"]+"\nWelcome to Just Us <3");
+            alert("Username: "+username["username"]+"\nWelcome to Just Us <3");
             signIn();
         }catch{
             console.log("ay dette funka visst ikke kompis")
@@ -39,12 +38,6 @@ export default function CreateUser() {
 
             <TextInput style={styles.textinput} placeholder="Your username" 
              onChangeText={(text)=> setUsername({username: text})}
-             underlineColorAndroid={'transparent'} ></TextInput>
-
-            <TextInput style={styles.textinput} placeholder="Your password"
-             password={true}
-             secureTextEntry={true}
-             onChangeText={(text)=> setPassword({password: text})}
              underlineColorAndroid={'transparent'} ></TextInput>
 
             <TouchableOpacity style={styles.button} onPress={ () => Submit()}>

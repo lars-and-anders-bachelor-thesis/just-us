@@ -19,10 +19,11 @@ export default function CreatePost() {
     {   
         const user = await AsyncStorage.getItem('storageUsername')
         try{
-            fetch('http://152.94.171.1:8080/Post', {
+            fetch('http://172.28.237.98:8080/Post', {
                 method: 'POST',
                 body: JSON.stringify({data: data["data"], owner: user})
-            });
+            })
+            alert("You have now successfully created a new post!");
         }catch{
             console.log("This did not go as planned")
         }

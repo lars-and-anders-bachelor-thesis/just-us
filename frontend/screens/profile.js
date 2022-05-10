@@ -49,7 +49,7 @@ const fetchData = async () => {
   let resp;  
   const user = await AsyncStorage.getItem('storageUsername')
   setUser(user)
-  const resp0nse = await axios.get('http://152.94.171.1:8080/Profile?username='+user) // /User
+  const resp0nse = await axios.get('http://172.28.237.98:8080/Profile?username='+user) // /User
   .then(function (response) {
       // handle success
       resp = response.data;
@@ -72,11 +72,11 @@ useEffect(() => {
 async function AcceptFollower(item){
   const user = await AsyncStorage.getItem('storageUsername')
   try{
-    await fetch('http://152.94.171.1:8080/User/AcceptFollow', {
+    await fetch('http://172.28.237.98:8080/User/AcceptFollow', {
         method: 'POST',
         body: JSON.stringify({userId: user, queryId: item})
     });
-    alert("You("+user+"), have now accepted the follower request of "+item);
+    alert("You have now accepted the follower request of "+item);
   }catch{
     console.log("ay dette funka visst ikke kompis")
   }
@@ -96,9 +96,9 @@ const { signOut } = React.useContext(AuthContext);
           <Image style={styles.avatar} source={{uri: 'https://bootdey.com/img/Content/avatar/avatar6.png'}}/>
           <View style={styles.body}>
             <View style={styles.bodyContent}>
-              <Text>{user}</Text>
+              <Text style={styles.texty}>{user}</Text>
               <TouchableOpacity style={styles.buttonContainer} onPress={() => showPending()}>
-                <Text>Show pending followers</Text>  
+                <Text style={styles.texty}>Show pending followers</Text>  
               </TouchableOpacity>           
               {clicked &&
               <FlatList
@@ -108,7 +108,7 @@ const { signOut } = React.useContext(AuthContext);
               />
               }
               <TouchableOpacity style={styles.buttonContainer} onPress={() => LogOut()}>
-                <Text>Log out</Text> 
+                <Text style={styles.texty}>Log out</Text> 
               </TouchableOpacity>
             </View>
         </View>
@@ -196,7 +196,8 @@ const styles = StyleSheet.create({
     width: 80,
     alignItems: 'stretch'
   },
-  // card: {
-  //   borderWidth: 2,
-  // }
+  texty: {
+    fontWeight: 'bold',
+    fontSize: 17,
+  }
 });

@@ -58,6 +58,7 @@ import {
                             uri: DATA[3].feed_image,
                         }}/>
                         <Text style={styles.userName}>{item.owner}</Text>
+                        <Text style={styles.userName}>Post ID: {item.postId.substring(0,7)}</Text>
                     </View>
                     <View style={styles.header_Right}>
                         <Icon name="ellipsis-h" style={styles.kake}/>
@@ -101,7 +102,7 @@ import {
     const fetchData = async () => {
         let resp;  
         const user = await AsyncStorage.getItem('storageUsername')
-        const resp0nse = await axios.get('http://152.94.171.1:8080/Posts?username='+user) // /User
+        const resp0nse = await axios.get('http://172.28.237.98:8080/Posts?username='+user) // /User
         .then(function (response) {
             // handle success
             resp = response.data;
@@ -126,7 +127,7 @@ import {
     async function SharePost(postid, owner){
     const user = await AsyncStorage.getItem('storageUsername')
     try{
-        fetch('http://152.94.171.1:8080/Post/Share', {
+        fetch('http://172.28.237.98:8080/Post/Share', {
             method: 'POST',
             body: JSON.stringify({userId: user, queryId: owner, postId: postid})
         }).then(response => response.json())

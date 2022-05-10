@@ -9,6 +9,11 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from "@react-navigation/stack";
 import { AuthContext } from "./frontend/context/context";
 
+import { LogBox } from "react-native";
+LogBox.ignoreLogs([
+  50000
+]);
+
 const Stack = createStackNavigator();
 
 export default function App() {

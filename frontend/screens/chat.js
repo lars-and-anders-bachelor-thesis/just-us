@@ -17,7 +17,7 @@ export default function Chat() {
         setMessages([
         {
             _id: 1,
-            text: 'Heisann :D Du står jo på og koder som bare faen du!',
+            text: 'Hey. You are one hell of a talented developer.',
             createdAt: new Date(),
             user: {
             _id: 2,
@@ -27,7 +27,7 @@ export default function Chat() {
         },
         {
             _id: 2,
-            text: 'Halla balla',
+            text: 'Hey there!',
             createdAt: new Date(),
             user: {
             _id: 1,

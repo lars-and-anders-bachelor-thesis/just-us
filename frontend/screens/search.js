@@ -38,7 +38,7 @@ export default function Search({navigation}) {
       const user = await AsyncStorage.getItem('storageUsername');
       let resp;  
         try{
-            await fetch('http://152.94.171.1:8080/Users/Search', {
+            await fetch('http://172.28.237.98:8080/Users/Search', {
                 method: 'POST',
                 body: JSON.stringify({userId: user, queryId: searchPhrase})
             }).then(response => response.json())
@@ -66,7 +66,7 @@ export default function Search({navigation}) {
       const user = await AsyncStorage.getItem('storageUsername');
       let resp;  
         try{
-            await fetch('http://152.94.171.1:8080/User/Follow', {
+            await fetch('http://172.28.237.98:8080/User/Follow', {
                 method: 'POST',
                 body: JSON.stringify({userId: user, queryId: searchPhrase})
             }).then(response => response.json())
@@ -79,7 +79,7 @@ export default function Search({navigation}) {
               .then(function () {
               // always executed
             });
-            alert("Nå sendte vi en follow-boi med user: "+user+" til brukeren: "+searchPhrase)
+            alert("You have now sent a follower request from "+user+" to: "+searchPhrase)
         }catch{
             console.log("ay dette funka visst ikke kompis")
         }
@@ -100,18 +100,12 @@ export default function Search({navigation}) {
       </TouchableOpacity>
       {found &&
       <View>
-       <Text style={styles.details}>Found an user with the username: {searchPhrase}</Text>
+       <Text style={styles.details}>Found a user with the username: {searchPhrase}</Text>
        <TouchableOpacity style={styles.followUserBtn} onPress={() => Follow()}>
          <Text style={styles.loginText}>Send this user a follow request</Text>
        </TouchableOpacity>
        </View>
       }
-      {/* <List
-        searchPhrase={searchPhrase}
-        data={fakeData}
-        setClicked={setClicked}
-        navigation={navigation}
-      /> */}
     </SafeAreaView>
     );
 };
