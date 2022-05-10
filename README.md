@@ -4,7 +4,7 @@ Blockchain based social app for the privacy of the people!
 
 
 ## backend build instructions
-prerequisites: mysql, docker
+prerequisites: mysql, docker, docker-compose
 
 - (note: only tested on WSL 2 ubuntu and ubuntu 18.02LTS, need linux environment to run)
 - first clone just-us repo
