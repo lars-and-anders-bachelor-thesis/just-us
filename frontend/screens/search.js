@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import SearchBar from '../components/searchBar';
-import List from '../components/searchList'; 
-import UserPage from './userPage';
-import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'react-native-axios';
 
 import { 
   StyleSheet,
   Text,
   View,
-  FlatList,
   SafeAreaView,
   TouchableOpacity,
  } from 'react-native';
@@ -21,7 +16,6 @@ export default function Search({navigation}) {
     const [fakeData, setFakeData] = useState();
     const [found, setFound] = useState(false);
 
-    // get data from the fake api endpoint
     useEffect(() => {
         const getData = async () => {
         const apiResponse = await fetch(
@@ -38,7 +32,7 @@ export default function Search({navigation}) {
       const user = await AsyncStorage.getItem('storageUsername');
       let resp;  
         try{
-            await fetch('http://172.28.237.98:8080/Users/Search', {
+            await fetch('http://192.168.218.169:8080/Users/Search', {
                 method: 'POST',
                 body: JSON.stringify({userId: user, queryId: searchPhrase})
             }).then(response => response.json())
@@ -57,7 +51,7 @@ export default function Search({navigation}) {
               alert("Sorry didnt find any user with the name of: "+searchPhrase)
             }
         }catch{
-            console.log("ay dette funka visst ikke kompis")
+            console.log("This did not go as planned")
         }
     };
 
@@ -66,7 +60,7 @@ export default function Search({navigation}) {
       const user = await AsyncStorage.getItem('storageUsername');
       let resp;  
         try{
-            await fetch('http://172.28.237.98:8080/User/Follow', {
+            await fetch('http://192.168.218.169:8080/User/Follow', {
                 method: 'POST',
                 body: JSON.stringify({userId: user, queryId: searchPhrase})
             }).then(response => response.json())
@@ -81,7 +75,7 @@ export default function Search({navigation}) {
             });
             alert("You have now sent a follower request from "+user+" to: "+searchPhrase)
         }catch{
-            console.log("ay dette funka visst ikke kompis")
+            console.log("This did not go as planned")
         }
     };
 
@@ -142,7 +136,6 @@ const styles = StyleSheet.create({
       borderRadius: 10,
       height: 50,
       padding: 10,
-      // alignItems: "center",
       justifyContent: "center",
       marginTop: 10,
       backgroundColor: "#157EFB",

@@ -9,7 +9,6 @@ import {
   Text,
   View,
   Image,
-  Button,
   TouchableOpacity,
   FlatList
 } from 'react-native';
@@ -49,7 +48,7 @@ const fetchData = async () => {
   let resp;  
   const user = await AsyncStorage.getItem('storageUsername')
   setUser(user)
-  const resp0nse = await axios.get('http://172.28.237.98:8080/Profile?username='+user) // /User
+  const resp0nse = await axios.get('http://192.168.218.169:8080/Profile?username='+user) // /User
   .then(function (response) {
       // handle success
       resp = response.data;
@@ -72,13 +71,13 @@ useEffect(() => {
 async function AcceptFollower(item){
   const user = await AsyncStorage.getItem('storageUsername')
   try{
-    await fetch('http://172.28.237.98:8080/User/AcceptFollow', {
+    await fetch('http://192.168.218.169:8080/User/AcceptFollow', {
         method: 'POST',
         body: JSON.stringify({userId: user, queryId: item})
     });
     alert("You have now accepted the follower request of "+item);
   }catch{
-    console.log("ay dette funka visst ikke kompis")
+    console.log("This did not go as planned")
   }
   await fetchData();
 }

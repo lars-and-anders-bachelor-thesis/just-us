@@ -42,13 +42,13 @@ export default function App() {
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-  }, []); // loading-animasjon som jeg er litt usikker på om fungerer. Trengs å sjekke litt mer her ja
+  }, []);
 
   if (isLoading) {
     return <Splash />;
   }
 
-  return ( // lese seg opp på React Context, har ikke forstått det 100%. Edit: jeg forstod etter å ha tenkt på det når jeg lå på sofaen hos karolina
+  return ( 
     <AuthContext.Provider value={authContext}>  
       <NavigationContainer>
         { userToken ? (

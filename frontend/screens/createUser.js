@@ -20,7 +20,7 @@ export default function CreateUser() {
     {   
 
         try{
-            fetch('http://172.28.237.98:8080/User', {
+            fetch('http://192.168.218.169:8080/User', {
                 method: 'POST',
                 body: JSON.stringify({username: username["username"]})
             });
@@ -28,7 +28,7 @@ export default function CreateUser() {
             alert("Username: "+username["username"]+"\nWelcome to Just Us <3");
             signIn();
         }catch{
-            console.log("ay dette funka visst ikke kompis")
+            console.log("This did not go as planned")
         }
     };
 

@@ -19,7 +19,7 @@ export default function CreatePost() {
     {   
         const user = await AsyncStorage.getItem('storageUsername')
         try{
-            fetch('http://172.28.237.98:8080/Post', {
+            fetch('http://192.168.218.169:8080/Post', {
                 method: 'POST',
                 body: JSON.stringify({data: data["data"], owner: user})
             })

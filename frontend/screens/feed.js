@@ -7,43 +7,9 @@ import {
     Text,
     View,
     Image,
-    TextInput,
-    Button,
     TouchableOpacity,
     FlatList,
  } from 'react-native';
-
- const DATA = [
-     {
-         user_name: 'Lars Andreas Jåten',
-         user_image: '../assets/profile_pictures/user-1.jpg',
-         feed_image: 'https://www.datocms-assets.com/55942/1633528751-topptur.jpg?q=70&auto=format&w=450&fit=crop&crop=faces,focalpoint&iptc=allow&fp-x=0.5&fp-y=0.5',
-         like_count: '13037',
-         comment_count: '70'
-     },
-     {
-         user_name: 'Andreas Ringnes',
-         user_image: '../assets/profile_pictures/user-2.jpg',
-         feed_image: 'https://www.datocms-assets.com/55942/1633528751-topptur.jpg?q=70&auto=format&w=450&fit=crop&crop=faces,focalpoint&iptc=allow&fp-x=0.5&fp-y=0.5',
-         like_count: '13537',
-         comment_count: '44'
-     },
-     {
-         user_name: 'Willem Barents',
-         user_image:  '../assets/profile_pictures/user-3.jpg',
-         feed_image: 'https://www.datocms-assets.com/55942/1633528751-topptur.jpg?q=70&auto=format&w=450&fit=crop&crop=faces,focalpoint&iptc=allow&fp-x=0.5&fp-y=0.5',
-         like_count: '13337',
-         comment_count: '31'
-     },
-     {
-         user_name: 'Leif Eriksson',
-         user_image: '../assets/profile_pictures/user-4.jpg',
-         feed_image: 'https://www.datocms-assets.com/55942/1633528751-topptur.jpg?q=70&auto=format&w=450&fit=crop&crop=faces,focalpoint&iptc=allow&fp-x=0.5&fp-y=0.5',
-         like_count: '13137',
-         comment_count: '52'
-     },
- ]
-
 
  export default function Feed({ navigation }) {
 
@@ -54,9 +20,7 @@ import {
                     <View style={styles.header_Left}>
                         <Image 
                         style={styles.userImage}
-                        source={{
-                            uri: DATA[3].feed_image,
-                        }}/>
+                        source={{uri: 'https://www.datocms-assets.com/55942/1633528751-topptur.jpg?q=70&auto=format&w=450&fit=crop&crop=faces,focalpoint&iptc=allow&fp-x=0.5&fp-y=0.5'}}/>
                         <Text style={styles.userName}>{item.owner}</Text>
                         <Text style={styles.userName}>Post ID: {item.postId.substring(0,7)}</Text>
                     </View>
@@ -64,21 +28,16 @@ import {
                         <Icon name="ellipsis-h" style={styles.kake}/>
                     </View>
                 </View>
-                {/* <Image 
-                        style={styles.feedImage}
-                        source={{
-                            uri: DATA[3].feed_image,
-                }}/> */}
                 <Text>{item.data}</Text>
                 <View style={styles.card_Footer}>
                     <View style={styles.footer_Left}>
                         <View style={styles.footer_Left}>
                             <Icon name="heart" color="red" size={20}/>
-                            <Text style={{ marginLeft: 5, fontSize: 16}}>{DATA[3].like_count}</Text>
+                            <Text style={{ marginLeft: 5, fontSize: 16}}>1337</Text>
                         </View>
                     <View style={{flexDirection: "row", marginLeft: 15}}></View>
                         <Icon name="comment" color="gray" size={20}/>
-                        <Text style={{ marginLeft: 5, fontSize: 16}}>{DATA[3].comment_count}</Text>
+                        <Text style={{ marginLeft: 5, fontSize: 16}}>43</Text>
                     </View>
                     <TouchableOpacity style={styles.shareBtn} onPress={() => SharePost(item.postId, item.owner)}>
                         <Text style={styles.loginText}>Share this post</Text>
@@ -89,20 +48,13 @@ import {
             </View>
         )
      };
-
-    const FakeItem = ({ item }) => {
-        return (
-            <Text>Title of the coffee is {item.title}</Text>
-        )
-    };
    
     const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
     
     const fetchData = async () => {
         let resp;  
         const user = await AsyncStorage.getItem('storageUsername')
-        const resp0nse = await axios.get('http://172.28.237.98:8080/Posts?username='+user) // /User
+        const resp0nse = await axios.get('http://192.168.218.169:8080/Posts?username='+user) // /User
         .then(function (response) {
             // handle success
             resp = response.data;
@@ -117,7 +69,6 @@ import {
         const data = resp;
         console.log(data)
         setData(data);
-        setLoading(false);
     };   
 
      useEffect(() => {
@@ -127,7 +78,7 @@ import {
     async function SharePost(postid, owner){
     const user = await AsyncStorage.getItem('storageUsername')
     try{
-        fetch('http://172.28.237.98:8080/Post/Share', {
+        fetch('http://192.168.218.169:8080/Post/Share', {
             method: 'POST',
             body: JSON.stringify({userId: user, queryId: owner, postId: postid})
         }).then(response => response.json())
@@ -144,7 +95,7 @@ import {
         console.log(resp)
         fetchData();
     }catch{
-        console.log("ay dette funka visst ikke kompiso")
+        console.log("This did not go as planned")
     }
     }
 
@@ -158,15 +109,9 @@ import {
         </TouchableOpacity>
 
         <FlatList
-            data={data} // DATA
-            // renderItem={({ item }) => <Item user_name={item.user_name}
-            // user_image={item.user_image}
-            // feed_image={item.feed_image}
-            // like_count={item.like_count}
-            // comment_count={item.comment_count}
-            // />}
+            data={data}
             renderItem={Item}
-            keyExtractor={(item) => item.id} //.ToString()
+            keyExtractor={(item) => item.id}
         />
         </View> 
     )

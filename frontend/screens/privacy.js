@@ -15,32 +15,6 @@ import {
     FlatList,
  } from 'react-native';
 
-const fakeUsernames = [
-    {
-        id: '1',
-        sharer: 'Peter',
-        receuiver: 'Lars',
-    },
-    {
-        id: '2',
-        first: 'Lars',
-        second: 'Peter',
-        fourth: 'Erlend',
-        third: 'Amish',
-        fifth: 'Knut'
-    },
-    {
-        id: '3',
-        first: 'Peter',
-    },
-    {
-        id: '4',
-        first: 'Chris',
-        second: 'Amish',
-        third: 'Peter',
-    },
-];
-
 export default function Privacy({ navigation }) {
 
     const [postIdList, setPostIdList] = useState([]);
@@ -57,7 +31,7 @@ export default function Privacy({ navigation }) {
         const user = await AsyncStorage.getItem('storageUsername')
         {postIdList.map((postId)=>{
             // getHistory(postId)
-            const resp0nse = axios.get('http://172.28.237.98:8080/History/'+user+'/'+postId) // /User
+            const resp0nse = axios.get('http://192.168.218.169:8080/History/'+user+'/'+postId) // /User
             .then(function (response) {
                 // handle success
                 resp2 = response.data;
@@ -83,7 +57,7 @@ export default function Privacy({ navigation }) {
         let followers = [];
         let resp;  
         const user = await AsyncStorage.getItem('storageUsername')
-        const resp0nse = await axios.get('http://172.28.237.98:8080/Profile?username='+user) // /User
+        const resp0nse = await axios.get('http://192.168.218.169:8080/Profile?username='+user) // /User
         .then(function (response) {
             // handle success
             resp = response.data;
