@@ -56,18 +56,6 @@ func TestCreatePost(t *testing.T) {
 	require.EqualError(t, err, "user knutis does not exist")
 }
 
-/* func TestSharePost(t *testing.T) {
-	chaincodeStub := &mocks.ChaincodeStub{}
-	transactionContext := &mocks.TransactionContext{}
-	transactionContext.GetStubReturns(chaincodeStub)
-	userProfileJson := createProfile()
-	smartContract := chaincode.SmartContract{}
-
-
-	chaincodeStub.GetStateReturns(userProfileJson, nil)
-	err := smartContract.SharePost()
-} */
-
 func TestReadPost(t *testing.T) {
 	chaincodeStub := &mocks.ChaincodeStub{}
 	transactionContext := &mocks.TransactionContext{}
@@ -126,7 +114,7 @@ func TestReadAllPosts(t *testing.T) {
 }
 
 func createProfile() []byte {
-	post := chaincode.Asset{
+	post := chaincode.Post{
 		Owner:          "knutis",
 		PostId:         "post1",
 		SharingHistory: make([]string, 0),
@@ -135,7 +123,7 @@ func createProfile() []byte {
 		Followers:        make([]string, 0),
 		FollowedUsers:    []string{"lars"},
 		PendingFollowers: []string{"josh"},
-		Posts:            []chaincode.Asset{post},
+		Posts:            []chaincode.Post{post},
 		Username:         "anders",
 	}
 	userProfileJson, _ := json.Marshal(userProfile)
