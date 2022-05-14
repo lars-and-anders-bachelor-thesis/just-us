@@ -18,7 +18,9 @@ For the frontend build instructions, go [here.](https://github.com/lars-and-ande
 curl -sSL https://bit.ly/2ysbOFE | bash -s
 ```
 In WSL 2, make sure Docker Desktop is running as well as the WSL 2 integration being turned on in Docker Desktop.
-3. Move my-simple offchain inside fabric-samples folder
+
+3. Move my-simple offchain inside fabric-samples folder.
+
 4. Run the following command inside the backend folder:
 ```bash
 sudo ./databaseSetup.sh
