@@ -13,12 +13,6 @@ import {
 } from '../styles/messagesStyles';
 import { 
     StyleSheet,
-    Text,
-    View,
-    Image,
-    TextInput,
-    Button,
-    TouchableOpacity,
     FlatList
  } from 'react-native';
 

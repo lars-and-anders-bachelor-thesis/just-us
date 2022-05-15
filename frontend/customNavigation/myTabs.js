@@ -30,30 +30,28 @@ export default function MyTabs() {
     <Tab.Navigator screenOptions={({ route }) => ({
       tabBarIcon: ({ focused}) => {
         let iconName;
-
         if (route.name === 'Home') {
           iconName = "home"
-          return <Entypo name={iconName} size={24} color="black" />; // Her hadde React Navigation en finere kode. Sjekk ut den når du er blitt litt smartere i react native
+          return <Entypo name={iconName} size={24} color="black" />;
         } else if (route.name === 'Profile') {
           return <MaterialCommunityIcons name="account" size={24} color="black" />
         } else if (route.name === 'Inbox') {
           return <Entypo name="inbox" size={24} color="black" />
         } else if (route.name === 'Privacy') {
-          // Denne er midlertidig fordi login ikke skal være inne i hovedinnholdet
           return <Entypo name="lock" size={24} color="black" />
         }
       },
       tabBarActiveTintColor: 'tomato',
       tabBarInactiveTintColor: 'gray',
     })}>
-      <Tab.Screen name="Home" component={FeedNest} options={{headerShown: false}}/>
-      <Tab.Screen name="Privacy" component={ControlNest} options={{headerShown: false}}/>
-      <Tab.Screen name="Inbox" component={InboxNest} options={({route}) => ({
-        // tabBarVisible: false fungerer jo fanden ikke jo!!
-        // React native anbefaler heller å putte tab navigatoren inne i stack navigatoren, men det kan jeg fikse en senere gang tenker jeg
-        headerShown: false
-        })}/>
-      <Tab.Screen name="Profile" component={Profile} options={{headerShown: false}} />
+      <Tab.Screen name="Home" component={FeedNest} 
+                  options={{headerShown: false}}/>
+      <Tab.Screen name="Privacy" component={ControlNest}
+                   options={{headerShown: false}}/>
+      <Tab.Screen name="Inbox" component={InboxNest} 
+                  options={({route}) => ({headerShown: false})}/>
+      <Tab.Screen name="Profile" component={Profile} 
+                  options={{headerShown: false}} />
     </Tab.Navigator>
   );
 }

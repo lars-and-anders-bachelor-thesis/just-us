@@ -1,17 +1,13 @@
 import React, {useState, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'react-native-axios';
+import '../assets/globalVariable.js'
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { 
     StyleSheet,
     Text,
     View,
-    Image,
-    TextInput,
-    Button,
-    TouchableOpacity,
-    Dimensions,
     FlatList,
  } from 'react-native';
 
@@ -27,11 +23,12 @@ export default function Privacy({ navigation }) {
             postIdList.push(post["postId"])
         })}
         let resp2;  
+        let IPaddress = global.ip
         let userSharedListy = [];
         const user = await AsyncStorage.getItem('storageUsername')
         {postIdList.map((postId)=>{
             // getHistory(postId)
-            const resp0nse = axios.get('http://192.168.218.169:8080/History/'+user+'/'+postId) // /User
+            const resp0nse = axios.get('http://'+IPaddress+':8080/History/'+user+'/'+postId) // /User
             .then(function (response) {
                 // handle success
                 resp2 = response.data;
@@ -55,9 +52,10 @@ export default function Privacy({ navigation }) {
 
     const fetchData = async () => {
         let followers = [];
+        let IPaddress = global.ip
         let resp;  
         const user = await AsyncStorage.getItem('storageUsername')
-        const resp0nse = await axios.get('http://192.168.218.169:8080/Profile?username='+user) // /User
+        const resp0nse = await axios.get('http://'+IPaddress+':8080/Profile?username='+user) // /User
         .then(function (response) {
             // handle success
             resp = response.data;
@@ -83,44 +81,43 @@ export default function Privacy({ navigation }) {
     return (
             <View>
                 <Text style={styles.info}>
-                    Here is the the users who have shared your posts. The red sharers does not follow you.
+                    Here is the the users who have shared your posts. The red sharers does not follow you. {global.ip}
                 </Text>
             <FlatList
             data={userSharedList}
             keyExtractor={item => item.postId}
-            renderItem={({item}) => (
+            renderItem={({item}) => ( // This is where the rendered component is defined.
                 <View style={styles.container}>
                     <View style={styles.postIdField} numberOfLines={1}>
-                        <Text>Postid: {item.postId.substring(0,7)}</Text>
+                        <Text>Postid: {item.postId.substring(0,7)}</Text> 
                     </View>
-                    {item.sharers.length > 0 &&
+                    {item.sharers.length > 0 &&    // The content after && is displayed if the condition is true.
                         <View style={styles.userCard}>
-                            {item.sharers.map((username) => {
+                            {item.sharers.map((username) => { // Map is looping through the sharers list and retrieves the username
                                 return(
                                     <View style={styles.arrowUser}>
                                         <Icon name="arrow-right" size={20} style={styles.arrow}/>
-                                        {!followerList.includes(username) ? 
-                                        <View>
+                                        {!followerList.includes(username) ? // A new if-statement with a condition.
+                                        //  This is where users that are in the share list and not in the followerlist
+                                        //  gets red font and the follower gets normal black font.
+                                        <View>                              
                                             <Text style={styles.imposter}>{username}</Text>
                                         </View>
-                                        :
+                                        : // This is the else-statement. Because of this, the ?-operator is used instead of &&.
                                         <View>
-                                            <Text>{username}</Text>
+                                            <Text>{username}</Text> 
                                         </View>}
                                     </View>
                                 )
                             })}
                         </View>
                     }
-                    {item.sharers.length < 1 &&
+                    {item.sharers.length < 1 && // Another conditional rendering that check if the post has any sharers.
                     <View style={styles.arrowUser}>
                         <Text>No one has shared this post.</Text>
-                    </View>
-                    }
+                    </View>}
                 </View>
-            )}
-            >
-            </FlatList>
+            )}></FlatList>
         </View>
     )
 }

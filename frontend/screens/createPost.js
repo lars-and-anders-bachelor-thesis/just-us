@@ -1,48 +1,50 @@
 import React, {useState} from 'react';
-import { AuthContext } from '../context/context';
+import '../assets/globalVariable.js'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { 
     StyleSheet,
     Text,
     View,
-    Image,
     TextInput,
-    Button,
     TouchableOpacity,
  } from 'react-native';
 
 export default function CreatePost() {
 
-    const [data, setData] = useState('');
+    const [data, setData] = useState(''); // The local variable where the post is temporarily stored
 
-    async function Submit()
+    async function Submit() // The Submit function is async so await can be used
     {   
-        const user = await AsyncStorage.getItem('storageUsername')
+        let IPaddress = global.ip;
+        const user = await AsyncStorage.getItem('storageUsername') // Get the user that is logged in
         try{
-            fetch('http://192.168.218.169:8080/Post', {
+            fetch('http://'+IPaddress+':8080/Post', {             // The fetch with method POST
                 method: 'POST',
-                body: JSON.stringify({data: data["data"], owner: user})
+                body: JSON.stringify({data: data["data"], owner: user}) // Body including the post and the posting user
             })
             alert("You have now successfully created a new post!");
         }catch{
-            console.log("This did not go as planned")
+            console.log("This did not go as planned")           // This message logs when the fetch is unsuccessful 
         }
     };
-
-    return (
-        <View style={styles.container}>
+    
+    // This is the component that is visually displayed on the screen
+    return ( 
+        <View style={styles.container}> 
             <Text style={styles.header}>Create post</Text>
 
             <TextInput style={styles.textinput} placeholder="Content of the post"
-             onChangeText={(text)=> setData({data: text})}
-             underlineColorAndroid={'transparent'} ></TextInput>
+             onChangeText={(text)=> setData({data: text})}  // The data variable set by the essential OnChangeText property
+             underlineColorAndroid={'transparent'} ></TextInput> 
            
-            <TouchableOpacity style={styles.buttonContainer} onPress={()=>{Submit()}}>
-                <Text style={styles.btntxt}>Post</Text>
+            <TouchableOpacity style={styles.buttonContainer} 
+                onPress={()=>{Submit()}}                // TouchableOpacity is the button that calls Submit() when pressed
+                ><Text style={styles.btntxt}>Post</Text>
             </TouchableOpacity>
         </View>
-    )
+    )                   
 }
+
 
 const styles = StyleSheet.create({
     container: {

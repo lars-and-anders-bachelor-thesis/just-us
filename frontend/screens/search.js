@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SearchBar from '../components/searchBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import '../assets/globalVariable.js'
 
 import { 
   StyleSheet,
@@ -30,9 +31,10 @@ export default function Search({navigation}) {
     async function Search()
     {   
       const user = await AsyncStorage.getItem('storageUsername');
+      let IPaddress = global.ip;
       let resp;  
         try{
-            await fetch('http://192.168.218.169:8080/Users/Search', {
+            await fetch('http://'+IPaddress+':8080/Users/Search', {
                 method: 'POST',
                 body: JSON.stringify({userId: user, queryId: searchPhrase})
             }).then(response => response.json())
@@ -58,9 +60,10 @@ export default function Search({navigation}) {
     async function Follow()
     {   
       const user = await AsyncStorage.getItem('storageUsername');
+      let IPaddress = global.ip;
       let resp;  
         try{
-            await fetch('http://192.168.218.169:8080/User/Follow', {
+            await fetch('http://'+IPaddress+':8080/User/Follow', {
                 method: 'POST',
                 body: JSON.stringify({userId: user, queryId: searchPhrase})
             }).then(response => response.json())

@@ -26,12 +26,10 @@ Stack.navigationOptions = ({ navigation }) => {
 export default function InboxNest() {
     return (
         <Stack.Navigator>
-            {/* Her er det et mellomrom etter inbox fordi det blir warning når tab.screenen og stack.screenen heter det samme*/}
             <Stack.Screen name="Inbox " component={Inbox} /> 
             <Stack.Screen name="Chat" component={Chat} options={({route}) => ({
-                title: route.params.userName
+                title: route.params.userName //  options is the reason we get Username as the screen title
             })}/> 
-            {/* options her gjør at vi kan ha username som tittel */}
         </Stack.Navigator>    
     )
 }

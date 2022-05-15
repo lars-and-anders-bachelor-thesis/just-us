@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axios from 'react-native-axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import '../assets/globalVariable.js'
+
 import { 
     StyleSheet,
     Text,
@@ -44,17 +46,17 @@ import {
                     </TouchableOpacity>
                     <Icon name="bookmark" color="gray" size={20}/>
                 </View>
-    
             </View>
         )
-     };
+    };
    
     const [data, setData] = useState([]);
     
     const fetchData = async () => {
+        let IPaddress = global.ip;
         let resp;  
         const user = await AsyncStorage.getItem('storageUsername')
-        const resp0nse = await axios.get('http://192.168.218.169:8080/Posts?username='+user) // /User
+        const resp0nse = await axios.get('http://'+IPaddress+':8080/Posts?username='+user) // /User
         .then(function (response) {
             // handle success
             resp = response.data;
@@ -76,27 +78,28 @@ import {
     }, []);
 
     async function SharePost(postid, owner){
-    const user = await AsyncStorage.getItem('storageUsername')
-    try{
-        fetch('http://192.168.218.169:8080/Post/Share', {
-            method: 'POST',
-            body: JSON.stringify({userId: user, queryId: owner, postId: postid})
-        }).then(response => response.json())
-        // handle success
-        .then(json => resp=json)
-            .catch(function (error) {
-                // handle error
-                console.log(error);
-        })
-            .then(function () {
-            // always executed
-        });
-        alert(user+" have now shared "+owner+"'s post with postId"+postid);
-        console.log(resp)
-        fetchData();
-    }catch{
-        console.log("This did not go as planned")
-    }
+        let IPaddress = global.ip;
+        const user = await AsyncStorage.getItem('storageUsername')
+        try{
+            fetch('http://'+IPaddress+':8080/Post/Share', {
+                method: 'POST',
+                body: JSON.stringify({userId: user, queryId: owner, postId: postid})
+            }).then(response => response.json())
+            // handle success
+            .then(json => resp=json)
+                .catch(function (error) {
+                    // handle error
+                    console.log(error);
+            })
+                .then(function () {
+                // always executed
+            });
+            alert(user+" have now shared "+owner+"'s post with postId"+postid);
+            console.log(resp)
+            fetchData();
+        }catch{
+            console.log("This did not go as planned")
+        }
     }
 
     return (

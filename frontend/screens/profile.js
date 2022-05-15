@@ -3,6 +3,7 @@ import { AuthContext } from '../context/context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'react-native-axios';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import '../assets/globalVariable.js'
 
 import {
   StyleSheet,
@@ -45,10 +46,11 @@ function showPending() {
 }
 
 const fetchData = async () => {
+  let IPaddress = global.ip;
   let resp;  
   const user = await AsyncStorage.getItem('storageUsername')
   setUser(user)
-  const resp0nse = await axios.get('http://192.168.218.169:8080/Profile?username='+user) // /User
+  const resp0nse = await axios.get('http://'+IPaddress+':8080/Profile?username='+user) // /User
   .then(function (response) {
       // handle success
       resp = response.data;
@@ -69,9 +71,10 @@ useEffect(() => {
 }, []);
 
 async function AcceptFollower(item){
+  let IPaddress = global.ip;
   const user = await AsyncStorage.getItem('storageUsername')
   try{
-    await fetch('http://192.168.218.169:8080/User/AcceptFollow', {
+    await fetch('http://'+IPaddress+':8080/User/AcceptFollow', {
         method: 'POST',
         body: JSON.stringify({userId: user, queryId: item})
     });

@@ -23,7 +23,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./frontend/assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.andymeng.justus"
     },
     "web": {
       "favicon": "./fontend/assets/favicon.png"

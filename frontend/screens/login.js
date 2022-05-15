@@ -1,25 +1,18 @@
-import React, {useState} from 'react';
-import { AuthContext } from '../context/context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React from 'react';
 import { 
     StyleSheet,
     Text,
     View,
     Image,
-    TextInput,
-    Button,
     TouchableOpacity,
  } from 'react-native';
 
- 
 
- 
 export default function Login({ navigation }) {
-
 
     return (
         <View style={styles.container}>
-            <Text style={styles.h1}>Just us</Text>
+            <Text style={styles.h1}>Just Us</Text>
             <Image style={styles.image} source={require("../assets/lock.png")} />
 
             <TouchableOpacity style={styles.loginBtn} onPress={() => navigation.navigate("LoginUser")}>

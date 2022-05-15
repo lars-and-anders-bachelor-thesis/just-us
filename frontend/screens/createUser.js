@@ -1,13 +1,13 @@
 import React, {useState} from 'react';
 import { AuthContext } from '../context/context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import '../assets/globalVariable.js'
+
 import { 
     StyleSheet,
     Text,
     View,
-    Image,
     TextInput,
-    Button,
     TouchableOpacity,
  } from 'react-native';
 
@@ -18,9 +18,9 @@ export default function CreateUser() {
 
     async function Submit()
     {   
-
+        let IPaddress = global.ip;
         try{
-            fetch('http://192.168.218.169:8080/User', {
+            fetch('http://'+IPaddress+':8080/User', {
                 method: 'POST',
                 body: JSON.stringify({username: username["username"]})
             });
