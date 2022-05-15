@@ -13,15 +13,15 @@ For the frontend build instructions, go [here.](https://github.com/lars-and-ande
 ### Step-by-step build
 
 1. Clone the Just Us repository
-2. Clone fabric-samples repository and binaries using the following command from within the just-us folder:
+2. Clone fabric-samples repository and binaries using the following command from within the just-us/backend folder:
 ```bash
 curl -sSL https://bit.ly/2ysbOFE | bash -s
 ```
 In WSL 2, make sure Docker Desktop is running as well as the WSL 2 integration being turned on in Docker Desktop.
 
-3. Move my-simple offchain inside fabric-samples folder.
+3. Move the my-simple-offchain folder inside the fabric-samples folder.
 
-4. Run the following command inside the backend folder:
+4. Run the following command inside the backend folder to initialize database with the required user and tables:
 ```bash
 sudo ./databaseSetup.sh
 ```
@@ -33,7 +33,7 @@ sudo service mysql start
 ```bash
 start.sh
 ```
-6. Follow build instructions from output of start.sh
+6. Follow server build instructions from output of start.sh
 <!-- - first clone just-us repo
 - clone fabric-samples repo and binaries using command 'curl -sSL https://bit.ly/2ysbOFE | bash -s' from within backend folder in just-us
 	- in WSL 2, make sure docker desktop is running as well as WSL 2 integration being turned on in docker desktop
