@@ -62,9 +62,11 @@ In the just-us folder, use the following commands to start the local server of t
 npm install
 npm start
 ```
-if you encounter an error on the mobile device, try running 
+
+<!--
+If you encounter an error on the mobile device, try running the application with 
 ```bash
-npm start --tunnel
+expo start --tunnel
 ```
 instead.
-
+-->
