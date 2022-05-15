@@ -13,7 +13,7 @@ You can use the following command to check your version:
 node -v
 ```
 
-You also need a mobile device to run the application on, whether this is a physical phone or an emulated one. [Android Studio](https://developer.android.com/studio)'s Emulator is the Android Emulator that has been used to develop and test this application. 
+You need a mobile device to run the application on. [Android Studio](https://developer.android.com/studio)'s Emulator is the Android Emulator that has been used to develop and test this application. 
 
 
 
@@ -55,10 +55,18 @@ The backend server needs to be running for the API calls to work. The setup for 
 
 
 ### Running the application
+If you are using the android emulator, start android studio, and press the "start" icon next to the phone description (e.g. pixel 3a).
 
-When in the just-us folder, one has to use the following command to start the local server of the application: 
+In the just-us folder, use the following commands to start the local server of the application: 
 ```bash
+npm install
 npm start
 ```
 
-Then if you are going to use an Mobile Device Emulator, you have to press **`a`** to connect to the device. It is also helpful to know the **`r`** to reload the application if it enters an unexpected crash. 
+<!--
+If you encounter an error on the mobile device, try running the application with 
+```bash
+expo start --tunnel
+```
+instead.
+-->
