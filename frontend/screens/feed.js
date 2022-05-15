@@ -15,7 +15,7 @@ import {
 
  export default function Feed({ navigation }) {
 
-    function Item({ item }){
+    function Item({ item }){ // This is the component that is rendered as the Flatlist component
         return (
             <View style={styles.card}>
                 <View style={styles.card_Header}>
@@ -52,7 +52,7 @@ import {
    
     const [data, setData] = useState([]);
     
-    const fetchData = async () => {
+    const fetchData = async () => { // fetches the posts from the users the logged in user follows
         let IPaddress = global.ip;
         let resp;  
         const user = await AsyncStorage.getItem('storageUsername')
@@ -77,7 +77,7 @@ import {
         fetchData();
     }, []);
 
-    async function SharePost(postid, owner){
+    async function SharePost(postid, owner){ // This makes it possible to share the post for followers
         let IPaddress = global.ip;
         const user = await AsyncStorage.getItem('storageUsername')
         try{
