@@ -22,7 +22,7 @@ You also need a mobile device to run the application on, whether this is a physi
 To clone the repository you have to run the following command where you want your cloned repository:
 
 ```bash
-git clone --branch frontend https://github.com/link/to/repo
+git clone --branch frontend https://github.com/lars-and-anders-bachelor-thesis/just-us
 ```
 
 
