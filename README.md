@@ -61,4 +61,4 @@ When in the just-us folder, one has to use the following command to start the lo
 npm start
 ```
 
-Then if you are going to use an Mobile Device Emulator, you have to press **`r`** to connect to the device. It is also helpful to know the **`r`** to reload the application if it enters an unexpected crash. 
+Then if you are going to use an Mobile Device Emulator, you have to press **`a`** to connect to the device. It is also helpful to know the **`r`** to reload the application if it enters an unexpected crash. 
